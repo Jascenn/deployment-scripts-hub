@@ -288,7 +288,7 @@ read_install_history() {
 # 显示安装历史
 show_install_history() {
     if ! read_install_history; then
-        return 1
+        return 0
     fi
 
     log_info "读取安装历史记录..."
@@ -906,7 +906,7 @@ read_install_history() {
 # 显示安装历史
 show_install_history() {
     if ! read_install_history; then
-        return 1
+        return 0
     fi
 
     log_info "读取安装历史记录..."
