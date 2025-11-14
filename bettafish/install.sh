@@ -155,35 +155,14 @@ if ! $SKIP_ENV_CHECK; then
 fi
 
 # ================================
-# 步骤 1: 下载 BettaFish 源码
+# 步骤 1: 下载部署脚本
 # ================================
 
-log_step "步骤 1: 下载 BettaFish 源码"
+log_step "步骤 1: 下载部署脚本"
 
 log_info "创建部署目录: $DEPLOY_DIR"
 mkdir -p "$DEPLOY_DIR"
 cd "$DEPLOY_DIR"
-
-log_info "克隆 BettaFish 仓库..."
-if ! git clone --depth 1 --branch "$GITHUB_BRANCH" "$GITHUB_REPO" BettaFish-main 2>&1 | grep -v "Cloning into"; then
-    log_error "克隆失败"
-    echo ""
-    echo "可能的原因:"
-    echo "  1. 网络连接问题"
-    echo "  2. GitHub 访问受限"
-    echo "  3. 需要使用代理"
-    echo ""
-    echo "请尝试:"
-    echo "  使用代理: --proxy http://127.0.0.1:7890"
-    exit 1
-fi
-log_success "源码下载完成"
-
-# ================================
-# 步骤 2: 下载部署脚本
-# ================================
-
-log_step "步骤 2: 下载部署脚本"
 
 log_info "下载 docker-deploy.sh..."
 if ! curl -fsSL "$SCRIPT_REPO/docker-deploy.sh" -o docker-deploy.sh; then
@@ -202,29 +181,10 @@ else
 fi
 
 # ================================
-# 步骤 3: 准备配置文件
+# 步骤 2: 执行部署
 # ================================
 
-log_step "步骤 3: 准备配置文件"
-
-cd BettaFish-main
-
-if [ -f ".env.example" ] && [ ! -f ".env" ]; then
-    log_info "创建 .env 配置文件..."
-    cp .env.example .env
-    log_success ".env 文件已创建"
-    log_warn "请稍后编辑 .env 文件配置 API 密钥"
-else
-    log_info ".env 文件已存在，跳过创建"
-fi
-
-cd ..
-
-# ================================
-# 步骤 4: 执行部署
-# ================================
-
-log_step "步骤 4: 执行部署脚本"
+log_step "步骤 2: 执行部署脚本"
 
 log_info "开始部署 BettaFish..."
 echo ""
@@ -237,13 +197,6 @@ fi
 
 # 执行部署脚本
 log_info "准备执行部署..."
-cd BettaFish-main
-
-# 将 docker-deploy.sh 移到项目目录，方便后续使用
-if [ -f "../docker-deploy.sh" ]; then
-    mv ../docker-deploy.sh ./
-fi
-
 chmod +x docker-deploy.sh
 
 # 直接执行部署脚本
@@ -257,15 +210,15 @@ if [ ! -t 0 ]; then
         if ! bash ./docker-deploy.sh < /dev/tty; then
             log_error "部署失败"
             echo ""
-            echo "部署目录: $DEPLOY_DIR/BettaFish-main"
-            echo "您可以手动执行: cd $DEPLOY_DIR/BettaFish-main && ./docker-deploy.sh"
+            echo "部署目录: $DEPLOY_DIR"
+            echo "您可以手动执行: cd $DEPLOY_DIR && ./docker-deploy.sh"
             exit 1
         fi
     else
         log_error "检测到非交互式环境且无法访问终端"
         log_info "请在终端中手动执行部署脚本："
         echo ""
-        echo -e "${BOLD}${GREEN}cd $DEPLOY_DIR/BettaFish-main && ./docker-deploy.sh${NC}"
+        echo -e "${BOLD}${GREEN}cd $DEPLOY_DIR && ./docker-deploy.sh${NC}"
         echo ""
         exit 1
     fi
@@ -274,8 +227,8 @@ else
     if ! bash ./docker-deploy.sh; then
         log_error "部署失败"
         echo ""
-        echo "部署目录: $DEPLOY_DIR/BettaFish-main"
-        echo "您可以手动执行: cd $DEPLOY_DIR/BettaFish-main && ./docker-deploy.sh"
+        echo "部署目录: $DEPLOY_DIR"
+        echo "您可以手动执行: cd $DEPLOY_DIR && ./docker-deploy.sh"
         exit 1
     fi
 fi
@@ -292,16 +245,17 @@ echo ""
 echo -e "${GREEN}${BOLD}🎉 BettaFish 已成功安装！${NC}"
 echo ""
 echo "📍 安装信息:"
-echo "  部署目录: $DEPLOY_DIR"
-echo "  源码目录: $DEPLOY_DIR/BettaFish-main"
+echo "  脚本目录: $DEPLOY_DIR"
+echo "  源码目录: $DEPLOY_DIR/BettaFish-main (由 docker-deploy.sh 自动下载)"
 echo "  访问地址: http://localhost:8501"
 echo ""
 echo "🔧 下一步操作:"
-echo "  1. 配置 API 密钥:"
+echo "  1. 配置 API 密钥 (如需要):"
 echo "     cd $DEPLOY_DIR/BettaFish-main"
 echo "     nano .env"
 echo ""
 echo "  2. 重启服务:"
+echo "     cd $DEPLOY_DIR/BettaFish-main"
 echo "     docker-compose restart"
 echo ""
 echo "  3. 访问应用:"

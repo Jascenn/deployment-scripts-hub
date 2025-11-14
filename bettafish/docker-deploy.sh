@@ -1458,23 +1458,36 @@ for path in "${POSSIBLE_PATHS[@]}"; do
 done
 
 if [ -z "$PROJECT_DIR" ]; then
-    log_error "未找到 BettaFish 项目源码"
+    log_warn "未找到 BettaFish 项目源码"
     echo ""
-    log_info "请确保项目结构如下："
+    log_info "正在从 GitHub 自动下载..."
     echo ""
-    echo "  BettaFish-Deployment-Kit/"
-    echo "  ├── docker-deploy.sh         (本脚本)"
-    echo "  └── BettaFish-main/           (从 GitHub 下载的项目)"
-    echo "      ├── Dockerfile"
-    echo "      ├── InsightEngine/"
-    echo "      ├── MediaEngine/"
-    echo "      └── ..."
-    echo ""
-    log_info "从 GitHub 下载项目:"
-    echo ""
-    echo "  git clone https://github.com/your-repo/BettaFish.git BettaFish-main"
-    echo ""
-    exit 1
+
+    # 自动下载 BettaFish 源码
+    GITHUB_REPO="https://github.com/666ghj/BettaFish"
+    GITHUB_BRANCH="main"
+    DOWNLOAD_DIR="$SCRIPT_DIR/BettaFish-main"
+
+    if command -v git >/dev/null 2>&1; then
+        if git clone --depth 1 --branch "$GITHUB_BRANCH" "$GITHUB_REPO" "$DOWNLOAD_DIR"; then
+            PROJECT_DIR="$DOWNLOAD_DIR"
+            log_success "源码下载完成: $PROJECT_DIR"
+        else
+            log_error "Git clone 失败"
+            echo ""
+            log_info "请手动下载项目:"
+            echo "  git clone $GITHUB_REPO BettaFish-main"
+            echo ""
+            exit 1
+        fi
+    else
+        log_error "未安装 git 命令"
+        echo ""
+        log_info "请先安装 git，或手动下载项目:"
+        echo "  下载地址: https://github.com/666ghj/BettaFish/archive/refs/heads/main.zip"
+        echo ""
+        exit 1
+    fi
 fi
 
 cd "$PROJECT_DIR"
