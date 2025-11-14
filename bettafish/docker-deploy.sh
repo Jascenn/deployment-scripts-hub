@@ -45,10 +45,10 @@ progress_bar() {
     local filled=$((width * current / total))
     local empty=$((width - filled))
 
-    printf "\r${CYAN}[${NC}"
+    printf "\r\e[0;36m[\e[0m"
     printf "%${filled}s" | tr ' ' '█'
     printf "%${empty}s" | tr ' ' '░'
-    printf "${CYAN}]${NC} ${BOLD}%3d%%${NC}" $percentage
+    printf "\e[0;36m]\e[0m \e[1m%3d%%\e[0m" $percentage
 }
 
 # 旋转动画
@@ -1447,17 +1447,17 @@ if prepare_docker_image "python:3.11-slim" "python-3.11-slim.tar"; then
         echo ""
         log_warn "当前镜像源可能不可用，建议使用备选方案："
         echo ""
-        echo "  ${CYAN}方案 1:${NC} 导入本地离线包（推荐）"
+        echo -e "  ${CYAN}方案 1:${NC} 导入本地离线包（推荐）"
         echo "    • 从已下载的离线包导入镜像"
         echo "    • 不需要网络连接"
         echo "    • 位置: $OFFLINE_DIR"
         echo ""
-        echo "  ${CYAN}方案 2:${NC} 下载离线镜像包"
+        echo -e "  ${CYAN}方案 2:${NC} 下载离线镜像包"
         echo "    • 使用下载脚本获取离线包"
         echo "    • 自动保存到本地"
         echo "    • 下次可直接使用"
         echo ""
-        echo "  ${CYAN}方案 3:${NC} 稍后重试 Docker 部署"
+        echo -e "  ${CYAN}方案 3:${NC} 稍后重试 Docker 部署"
         echo "    • 等待镜像源恢复"
         echo "    • 使用完整容器化方案"
         echo ""
