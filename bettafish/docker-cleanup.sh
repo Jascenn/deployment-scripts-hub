@@ -1151,15 +1151,23 @@ manual_uninstall_bettafish() {
     read MANUAL_CHOICE
 
     case $MANUAL_CHOICE in
-        1|3)
+        1)
             log_info "停止并删除 BettaFish 容器..."
-            docker ps -a | grep bettafish | awk '{print $1}' | xargs -r docker rm -f 2>/dev/null || true
+            docker ps -a | grep bettafish | awk '{print $1}' | xargs docker rm -f 2>/dev/null || true
             log_success "容器已删除"
-            [ "$MANUAL_CHOICE" == "1" ] && return
-            ;&
+            ;;
         2)
             log_info "删除 BettaFish 镜像..."
-            docker images | grep bettafish | awk '{print $3}' | xargs -r docker rmi -f 2>/dev/null || true
+            docker images | grep bettafish | awk '{print $3}' | xargs docker rmi -f 2>/dev/null || true
+            log_success "镜像已删除"
+            ;;
+        3)
+            log_info "停止并删除 BettaFish 容器..."
+            docker ps -a | grep bettafish | awk '{print $1}' | xargs docker rm -f 2>/dev/null || true
+            log_success "容器已删除"
+
+            log_info "删除 BettaFish 镜像..."
+            docker images | grep bettafish | awk '{print $3}' | xargs docker rmi -f 2>/dev/null || true
             log_success "镜像已删除"
             ;;
         0)
