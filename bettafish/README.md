@@ -7,7 +7,7 @@
 ## 🚀 一键部署
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash
 ```
 
 **就这么简单！** 5-8 分钟后访问 http://localhost:8501
@@ -31,31 +31,34 @@ curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main
 ### 方式 1: 一键部署（推荐）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash
 ```
 
 ### 方式 2: 使用代理
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --proxy http://127.0.0.1:7890
 ```
 
-### 方式 3: 最小化部署
+### 方式 3: 指定安装目录
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --minimal
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --dir ~/my-bettafish
 ```
 
-### 方式 4: 从 Release 下载
+### 方式 4: 手动部署
 
 ```bash
-# 下载完整包
-curl -fsSL https://github.com/Jascenn/deployment-scripts-hub/releases/download/bettafish-v2.1/BettaFish-Deployment-Kit.tar.gz -o bettafish.tar.gz
+# 1. 克隆 BettaFish 源码
+git clone https://github.com/666ghj/BettaFish.git
 
-# 解压并部署
-tar -xzf bettafish.tar.gz
-cd BettaFish-Deployment-Kit
-./smart-deploy.sh
+# 2. 下载部署脚本
+cd BettaFish
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/docker-deploy.sh -o docker-deploy.sh
+chmod +x docker-deploy.sh
+
+# 3. 执行部署
+./docker-deploy.sh
 ```
 
 ---
@@ -65,25 +68,22 @@ cd BettaFish-Deployment-Kit
 ### 所有支持的参数
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- [选项]
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- [选项]
 ```
 
 | 参数 | 说明 | 示例 |
 |------|------|------|
 | `--proxy PROXY` | 设置代理 | `--proxy http://127.0.0.1:7890` |
-| `--minimal` | 使用最小核心包（3MB） | `--minimal` |
-| `--dir DIR` | 指定部署目录 | `--dir ~/bettafish` |
-| `--url URL` | 指定下载地址 | `--url https://custom-url.com` |
+| `--dir DIR` | 指定安装目录 | `--dir ~/bettafish` |
 | `--skip-env-check` | 跳过环境检查 | `--skip-env-check` |
 | `--help` | 显示帮助信息 | `--help` |
 
 ### 组合示例
 
 ```bash
-# 使用代理 + 最小包 + 指定目录
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- \
+# 使用代理 + 指定目录
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- \
   --proxy http://127.0.0.1:7890 \
-  --minimal \
   --dir ~/my-bettafish
 ```
 
@@ -120,9 +120,8 @@ curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main
 
 | 方式 | 下载大小 | 部署时间 | 包含内容 | 推荐场景 |
 |------|---------|---------|---------|---------|
-| **完整包** | ~10MB | 5-8分钟 | 脚本+文档+工具 | 首次部署 |
-| **最小包** | ~3MB | 3-5分钟 | 仅核心文件 | 快速部署 |
-| **从 Release** | ~10MB | 5-8分钟 | 完整包 | 离线部署 |
+| **一键安装** | ~20MB | 5-8分钟 | 自动下载源码+脚本 | 最简单 ⭐ |
+| **手动部署** | ~20MB | 5-8分钟 | 完整控制 | 有经验用户 |
 
 ### 网络环境
 
@@ -192,17 +191,17 @@ docker run --rm -v bettafish_data:/data -v $(pwd):/backup alpine tar xzf /backup
 
 #### Clash
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --proxy http://127.0.0.1:7890
 ```
 
 #### v2rayN
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:10809
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --proxy http://127.0.0.1:10809
 ```
 
 #### Shadowsocks
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy socks5://127.0.0.1:1080
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --proxy socks5://127.0.0.1:1080
 ```
 
 更多配置：[docs/advanced-config.md](docs/advanced-config.md)
@@ -245,7 +244,7 @@ lsof -i :8501
 **解决**：
 ```bash
 # 使用代理
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --proxy http://127.0.0.1:7890
 
 # 或配置 Docker 镜像加速器（国内）
 # 见 docs/troubleshooting.md
