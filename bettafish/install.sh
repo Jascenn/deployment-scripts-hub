@@ -235,13 +235,43 @@ if [ -n "$PROXY" ]; then
     export HTTPS_PROXY="$PROXY"
 fi
 
-# 执行部署脚本（移除 clear 命令以支持 curl 管道执行）
-if ! bash docker-deploy.sh; then
-    log_error "部署失败"
+# 执行部署脚本
+log_info "准备执行部署..."
+cd BettaFish-main
+
+# 将 docker-deploy.sh 移到项目目录，方便后续使用
+if [ -f "../docker-deploy.sh" ]; then
+    mv ../docker-deploy.sh ./
+fi
+
+chmod +x docker-deploy.sh
+
+# 检查是否在交互式终端中
+if [ -t 0 ] && [ -t 1 ]; then
+    # 在交互式终端中，直接执行
+    log_info "在交互式终端中执行部署脚本..."
     echo ""
-    echo "部署目录: $DEPLOY_DIR"
-    echo "请检查上方错误信息"
-    exit 1
+
+    if ! bash ./docker-deploy.sh; then
+        log_error "部署失败"
+        echo ""
+        echo "部署目录: $DEPLOY_DIR/BettaFish-main"
+        echo "您可以手动执行: cd $DEPLOY_DIR/BettaFish-main && ./docker-deploy.sh"
+        exit 1
+    fi
+else
+    # 非交互式环境（curl 管道），提示用户手动执行
+    log_warn "检测到非交互式环境"
+    log_info "为了获得最佳体验（进度条、颜色、交互式提示），请在终端中手动执行："
+    echo ""
+    echo -e "${BOLD}${GREEN}cd $DEPLOY_DIR/BettaFish-main && ./docker-deploy.sh${NC}"
+    echo ""
+    log_info "或者，如果您想跳过交互直接部署，可以使用："
+    echo ""
+    echo "  cd $DEPLOY_DIR/BettaFish-main"
+    echo "  docker-compose up -d"
+    echo ""
+    exit 0
 fi
 
 # ================================
