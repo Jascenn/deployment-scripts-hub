@@ -32,6 +32,10 @@ log_error() {
     echo -e "${RED}❌ ${NC}$1"
 }
 
+log_step() {
+    echo -e "\n${CYAN}${BOLD}▶ $1${NC}\n"
+}
+
 # Logo
 cat << "EOF"
 
