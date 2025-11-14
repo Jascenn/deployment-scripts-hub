@@ -45,10 +45,12 @@ progress_bar() {
     local filled=$((width * current / total))
     local empty=$((width - filled))
 
-    printf "\r\e[0;36m[\e[0m"
-    printf "%${filled}s" | tr ' ' '█'
-    printf "%${empty}s" | tr ' ' '░'
-    printf "\e[0;36m]\e[0m \e[1m%3d%%\e[0m" $percentage
+    # 生成进度条字符
+    local filled_bar=$(printf "%${filled}s" | tr ' ' '█')
+    local empty_bar=$(printf "%${empty}s" | tr ' ' '░')
+
+    # 使用 echo -ne 代替 printf 以确保 Linux 兼容性
+    echo -ne "\r${CYAN}[${NC}${filled_bar}${empty_bar}${CYAN}]${NC} ${BOLD}$(printf "%3d" $percentage)%%${NC}"
 }
 
 # 旋转动画
