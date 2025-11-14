@@ -1,7 +1,7 @@
 #!/bin/bash
 # BettaFish 智能一键部署脚本
-# 版本: v1.0
-# 使用方法: curl -fsSL https://example.com/smart-deploy.sh | bash
+# 版本: v2.1
+# 使用方法: curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
 
 set -e
 
@@ -71,8 +71,8 @@ while [[ $# -gt 0 ]]; do
 BettaFish 智能一键部署脚本
 
 使用方法:
-  curl -fsSL https://example.com/smart-deploy.sh | bash
-  curl -fsSL https://example.com/smart-deploy.sh | bash -s -- [选项]
+  curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- [选项]
 
 选项:
   --proxy PROXY       设置代理 (例如: http://127.0.0.1:7890)
@@ -84,19 +84,19 @@ BettaFish 智能一键部署脚本
 
 示例:
   # 基础部署
-  curl -fsSL https://example.com/smart-deploy.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
 
   # 使用代理
-  curl -fsSL https://example.com/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
+  curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
 
   # 最小化部署
-  curl -fsSL https://example.com/smart-deploy.sh | bash -s -- --minimal
+  curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --minimal
 
   # 指定目录
-  curl -fsSL https://example.com/smart-deploy.sh | bash -s -- --dir ~/bettafish
+  curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --dir ~/bettafish
 
   # 组合参数
-  curl -fsSL https://example.com/smart-deploy.sh | bash -s -- \
+  curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- \
     --proxy http://127.0.0.1:7890 \
     --minimal \
     --dir ~/bettafish
