@@ -3,7 +3,7 @@
 > 🚀 一站式部署脚本仓库 - 收集各种项目的自动化部署脚本
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Maintained](https://img.shields.io/badge/Maintained-Yes-green.svg)](https://github.com/YOUR_USERNAME/deployment-scripts-hub)
+[![Maintained](https://img.shields.io/badge/Maintained-Yes-green.svg)](https://github.com/Jascenn/deployment-scripts-hub)
 
 ---
 
@@ -27,7 +27,7 @@
 
 **一键部署**：
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
 ```
 
 **项目说明**：BettaFish 是一个基于 Docker 的 AI 对话系统
@@ -76,14 +76,14 @@ deployment-scripts-hub/
 ```bash
 # 查看项目列表（上方）
 # 复制对应的一键部署命令
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/PROJECT_NAME/smart-deploy.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/PROJECT_NAME/smart-deploy.sh | bash
 ```
 
 ### 方式 2: 从 Release 下载
 
 ```bash
 # 下载完整部署包
-curl -fsSL https://github.com/YOUR_USERNAME/deployment-scripts-hub/releases/download/bettafish-v2.1/BettaFish-Deployment-Kit.tar.gz -o bettafish.tar.gz
+curl -fsSL https://github.com/Jascenn/deployment-scripts-hub/releases/download/bettafish-v2.1/BettaFish-Deployment-Kit.tar.gz -o bettafish.tar.gz
 
 # 解压并部署
 tar -xzf bettafish.tar.gz
@@ -94,7 +94,7 @@ cd BettaFish-Deployment-Kit
 ### 方式 3: Clone 整个仓库
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/deployment-scripts-hub.git
+git clone https://github.com/Jascenn/deployment-scripts-hub.git
 cd deployment-scripts-hub/bettafish
 ./smart-deploy.sh
 ```
@@ -106,7 +106,7 @@ cd deployment-scripts-hub/bettafish
 所有部署脚本都支持通用参数：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/PROJECT/smart-deploy.sh | bash -s -- [选项]
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/PROJECT/smart-deploy.sh | bash -s -- [选项]
 ```
 
 ### 通用参数
@@ -123,10 +123,10 @@ curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hu
 
 ```bash
 # 使用代理部署
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
 
 # 最小化部署到指定目录
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --minimal --dir ~/bettafish
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --minimal --dir ~/bettafish
 ```
 
 ---
@@ -219,14 +219,14 @@ gh release create bettafish-v2.1 \
 
 始终从官方仓库下载：
 ```bash
-https://github.com/YOUR_USERNAME/deployment-scripts-hub
+https://github.com/Jascenn/deployment-scripts-hub
 ```
 
 ### 2. 先查看再执行
 
 ```bash
 # 下载脚本
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh -o deploy.sh
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh -o deploy.sh
 
 # 查看内容
 cat deploy.sh
@@ -239,7 +239,7 @@ bash deploy.sh
 
 ```bash
 # 下载校验和
-curl -fsSL https://github.com/YOUR_USERNAME/deployment-scripts-hub/releases/download/bettafish-v2.1/BettaFish-Deployment-Kit.tar.gz.sha256
+curl -fsSL https://github.com/Jascenn/deployment-scripts-hub/releases/download/bettafish-v2.1/BettaFish-Deployment-Kit.tar.gz.sha256
 
 # 验证文件
 sha256sum -c BettaFish-Deployment-Kit.tar.gz.sha256
@@ -305,7 +305,7 @@ docs(all): Update README with new examples
 
 ```bash
 # 使用 Gitee 镜像
-curl -fsSL https://gitee.com/YOUR_USERNAME/deployment-scripts-hub/raw/main/bettafish/smart-deploy.sh | bash
+curl -fsSL https://gitee.com/Jascenn/deployment-scripts-hub/raw/main/bettafish/smart-deploy.sh | bash
 ```
 
 所有脚本会自动检测网络环境，优先使用国内镜像源。
@@ -345,7 +345,7 @@ docker-compose up -d
 
 **A**:
 1. 查看项目的 `docs/troubleshooting.md`
-2. 搜索 [Issues](https://github.com/YOUR_USERNAME/deployment-scripts-hub/issues)
+2. 搜索 [Issues](https://github.com/Jascenn/deployment-scripts-hub/issues)
 3. 创建新 Issue
 
 ---
@@ -360,10 +360,10 @@ docker-compose up -d
 
 ## 🔗 相关链接
 
-- **官方仓库**: https://github.com/YOUR_USERNAME/deployment-scripts-hub
-- **问题反馈**: https://github.com/YOUR_USERNAME/deployment-scripts-hub/issues
-- **讨论区**: https://github.com/YOUR_USERNAME/deployment-scripts-hub/discussions
-- **Wiki**: https://github.com/YOUR_USERNAME/deployment-scripts-hub/wiki
+- **官方仓库**: https://github.com/Jascenn/deployment-scripts-hub
+- **问题反馈**: https://github.com/Jascenn/deployment-scripts-hub/issues
+- **讨论区**: https://github.com/Jascenn/deployment-scripts-hub/discussions
+- **Wiki**: https://github.com/Jascenn/deployment-scripts-hub/wiki
 
 ---
 
@@ -400,7 +400,7 @@ docker-compose up -d
 
 如果这个仓库对您有帮助，请给一个 Star ⭐
 
-[![Star History Chart](https://api.star-history.com/svg?repos=YOUR_USERNAME/deployment-scripts-hub&type=Date)](https://star-history.com/#YOUR_USERNAME/deployment-scripts-hub&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=Jascenn/deployment-scripts-hub&type=Date)](https://star-history.com/#Jascenn/deployment-scripts-hub&Date)
 
 ---
 

@@ -31,7 +31,7 @@ docker ps
 ### 步骤 1: 运行部署命令
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
 ```
 
 ### 步骤 2: 等待完成
@@ -62,19 +62,19 @@ http://localhost:8501
 ### Clash 用户
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
 ```
 
 ### v2rayN 用户
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:10809
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:10809
 ```
 
 ### 自定义代理
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://YOUR_PROXY_HOST:PORT
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://YOUR_PROXY_HOST:PORT
 ```
 
 ---
@@ -84,7 +84,7 @@ curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hu
 如果您不需要文档和辅助工具，可以使用最小包：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --minimal
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --minimal
 ```
 
 **优点**：
@@ -246,7 +246,7 @@ bettafish | You can now view your Streamlit app in your browser
 ## 遇到问题？
 
 - 查看 [问题排查文档](troubleshooting.md)
-- 搜索 [Issues](https://github.com/YOUR_USERNAME/deployment-scripts-hub/issues)
+- 搜索 [Issues](https://github.com/Jascenn/deployment-scripts-hub/issues)
 - 创建新问题
 
 ---

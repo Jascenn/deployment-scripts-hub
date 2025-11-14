@@ -7,7 +7,7 @@
 ## 🚀 一键部署
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
 ```
 
 **就这么简单！** 5-8 分钟后访问 http://localhost:8501
@@ -31,26 +31,26 @@ curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hu
 ### 方式 1: 一键部署（推荐）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
 ```
 
 ### 方式 2: 使用代理
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
 ```
 
 ### 方式 3: 最小化部署
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --minimal
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --minimal
 ```
 
 ### 方式 4: 从 Release 下载
 
 ```bash
 # 下载完整包
-curl -fsSL https://github.com/YOUR_USERNAME/deployment-scripts-hub/releases/download/bettafish-v2.1/BettaFish-Deployment-Kit.tar.gz -o bettafish.tar.gz
+curl -fsSL https://github.com/Jascenn/deployment-scripts-hub/releases/download/bettafish-v2.1/BettaFish-Deployment-Kit.tar.gz -o bettafish.tar.gz
 
 # 解压并部署
 tar -xzf bettafish.tar.gz
@@ -65,7 +65,7 @@ cd BettaFish-Deployment-Kit
 ### 所有支持的参数
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- [选项]
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- [选项]
 ```
 
 | 参数 | 说明 | 示例 |
@@ -81,7 +81,7 @@ curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hu
 
 ```bash
 # 使用代理 + 最小包 + 指定目录
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- \
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- \
   --proxy http://127.0.0.1:7890 \
   --minimal \
   --dir ~/my-bettafish
@@ -192,17 +192,17 @@ docker run --rm -v bettafish_data:/data -v $(pwd):/backup alpine tar xzf /backup
 
 #### Clash
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
 ```
 
 #### v2rayN
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:10809
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:10809
 ```
 
 #### Shadowsocks
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy socks5://127.0.0.1:1080
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy socks5://127.0.0.1:1080
 ```
 
 更多配置：[docs/advanced-config.md](docs/advanced-config.md)
@@ -245,7 +245,7 @@ lsof -i :8501
 **解决**：
 ```bash
 # 使用代理
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
+curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
 
 # 或配置 Docker 镜像加速器（国内）
 # 见 docs/troubleshooting.md
@@ -369,9 +369,9 @@ docker image prune -a
 ## 🔗 相关链接
 
 - **官方项目**: https://github.com/666ghj/BettaFish
-- **本脚本仓库**: https://github.com/YOUR_USERNAME/deployment-scripts-hub
-- **问题反馈**: https://github.com/YOUR_USERNAME/deployment-scripts-hub/issues
-- **讨论区**: https://github.com/YOUR_USERNAME/deployment-scripts-hub/discussions
+- **本脚本仓库**: https://github.com/Jascenn/deployment-scripts-hub
+- **问题反馈**: https://github.com/Jascenn/deployment-scripts-hub/issues
+- **讨论区**: https://github.com/Jascenn/deployment-scripts-hub/discussions
 
 ---
 
@@ -395,9 +395,9 @@ BettaFish 项目本身的许可证请查看：https://github.com/666ghj/BettaFis
 遇到问题？
 
 1. 查看 [问题排查文档](docs/troubleshooting.md)
-2. 搜索 [Issues](https://github.com/YOUR_USERNAME/deployment-scripts-hub/issues)
-3. 创建新 [Issue](https://github.com/YOUR_USERNAME/deployment-scripts-hub/issues/new)
-4. 加入 [讨论区](https://github.com/YOUR_USERNAME/deployment-scripts-hub/discussions)
+2. 搜索 [Issues](https://github.com/Jascenn/deployment-scripts-hub/issues)
+3. 创建新 [Issue](https://github.com/Jascenn/deployment-scripts-hub/issues/new)
+4. 加入 [讨论区](https://github.com/Jascenn/deployment-scripts-hub/discussions)
 
 ---
 
