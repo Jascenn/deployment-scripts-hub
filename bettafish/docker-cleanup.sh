@@ -85,6 +85,15 @@ show_cleanup_options() {
     echo "     • 不执行任何清理操作"
     echo "     • 查看可清理的空间"
     echo ""
+    echo -e "  ${YELLOW}6.${NC} 查看安装历史 ${CYAN}⭐${NC}"
+    echo "     • 显示组件安装记录"
+    echo "     • 查看哪些是脚本安装的"
+    echo ""
+    echo -e "  ${YELLOW}7.${NC} 智能卸载 BettaFish ${RED}⚠️${NC}"
+    echo "     • 只卸载脚本安装的组件"
+    echo "     • 保留已有的系统工具"
+    echo "     • 恢复到安装前状态"
+    echo ""
     echo -e "  ${YELLOW}0.${NC} 退出"
     echo ""
 }
@@ -249,13 +258,309 @@ show_stats() {
     echo ""
 }
 
+# ================================
+# 安装历史和智能卸载功能
+# ================================
+
+# 安装历史文件
+INSTALL_HISTORY_FILE="$HOME/.bettafish/install-history.log"
+
+# 读取安装历史
+read_install_history() {
+    if [ ! -f "$INSTALL_HISTORY_FILE" ]; then
+        log_warn "未找到安装历史记录"
+        echo ""
+        log_info "安装历史文件位置: $INSTALL_HISTORY_FILE"
+        log_info "可能原因:"
+        echo "  • 使用旧版本脚本部署（不支持安装历史）"
+        echo "  • 手动部署的 BettaFish"
+        echo ""
+        return 1
+    fi
+
+    return 0
+}
+
+# 显示安装历史
+show_install_history() {
+    if ! read_install_history; then
+        return 1
+    fi
+
+    log_info "读取安装历史记录..."
+    echo ""
+
+    # 读取元数据
+    local install_date=$(grep "^install_date=" "$INSTALL_HISTORY_FILE" | head -n1 | cut -d'=' -f2)
+    local script_version=$(grep "^script_version=" "$INSTALL_HISTORY_FILE" | head -n1 | cut -d'=' -f2)
+    local install_dir=$(grep "^install_dir=" "$INSTALL_HISTORY_FILE" | head -n1 | cut -d'=' -f2)
+
+    echo -e "${CYAN}═══════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}BettaFish 安装历史${NC}"
+    echo -e "${CYAN}═══════════════════════════════════════════════════${NC}"
+    echo ""
+    echo -e "  安装时间: ${GREEN}$install_date${NC}"
+    echo -e "  脚本版本: ${GREEN}$script_version${NC}"
+    echo -e "  安装目录: ${CYAN}$install_dir${NC}"
+    echo ""
+    echo -e "${CYAN}───────────────────────────────────────────────────${NC}"
+    echo -e "${BOLD}组件安装记录:${NC}"
+    echo ""
+
+    # 解析并显示每个组件
+    local current_component=""
+    local existed_before=""
+    local installed_by_script=""
+    local install_date_comp=""
+    local version=""
+
+    while IFS= read -r line; do
+        # 跳过注释和空行
+        [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
+
+        # 检测新组件节
+        if [[ "$line" =~ ^\[(.+)\]$ ]]; then
+            # 显示上一个组件的信息
+            if [ -n "$current_component" ] && [ "$current_component" != "metadata" ]; then
+                display_component_info "$current_component" "$existed_before" "$installed_by_script" "$install_date_comp" "$version"
+            fi
+
+            # 重置变量
+            current_component="${BASH_REMATCH[1]}"
+            existed_before=""
+            installed_by_script=""
+            install_date_comp=""
+            version=""
+            continue
+        fi
+
+        # 解析键值对
+        if [[ "$line" =~ ^([^=]+)=(.*)$ ]]; then
+            local key="${BASH_REMATCH[1]}"
+            local value="${BASH_REMATCH[2]}"
+
+            case "$key" in
+                existed_before) existed_before="$value" ;;
+                installed_by_script) installed_by_script="$value" ;;
+                install_date) install_date_comp="$value" ;;
+                version) version="$value" ;;
+            esac
+        fi
+    done < "$INSTALL_HISTORY_FILE"
+
+    # 显示最后一个组件
+    if [ -n "$current_component" ] && [ "$current_component" != "metadata" ]; then
+        display_component_info "$current_component" "$existed_before" "$installed_by_script" "$install_date_comp" "$version"
+    fi
+
+    echo -e "${CYAN}═══════════════════════════════════════════════════${NC}"
+    echo ""
+}
+
+# 显示单个组件信息
+display_component_info() {
+    local component=$1
+    local existed_before=$2
+    local installed_by_script=$3
+    local install_date=$4
+    local version=$5
+
+    # 组件名称映射
+    local display_name=""
+    case "$component" in
+        homebrew) display_name="Homebrew" ;;
+        docker) display_name="Docker Desktop" ;;
+        git) display_name="Git" ;;
+        colima) display_name="Colima" ;;
+        bettafish) display_name="BettaFish" ;;
+        *) display_name="$component" ;;
+    esac
+
+    # 图标和状态
+    if [ "$installed_by_script" == "true" ]; then
+        echo -e "  ${GREEN}✓${NC} ${BOLD}$display_name${NC}"
+        [ -n "$version" ] && echo -e "    └─ 版本: ${CYAN}$version${NC}"
+        [ -n "$install_date" ] && echo -e "    └─ 安装时间: ${CYAN}$install_date${NC}"
+        echo -e "    └─ 由脚本安装: ${GREEN}是${NC}"
+        echo -e "    └─ 可以安全卸载: ${GREEN}是${NC}"
+    else
+        echo -e "  ${YELLOW}○${NC} ${BOLD}$display_name${NC}"
+        if [ "$existed_before" == "true" ]; then
+            echo -e "    └─ 安装前已存在: ${YELLOW}是${NC}"
+            echo -e "    └─ 不建议卸载: ${YELLOW}系统或用户已安装${NC}"
+        else
+            echo -e "    └─ 未由脚本安装${NC}"
+        fi
+    fi
+    echo ""
+}
+
+# 智能卸载 BettaFish
+uninstall_bettafish() {
+    log_step "智能卸载 BettaFish"
+
+    # 检查安装历史
+    if ! read_install_history; then
+        log_warn "没有安装历史记录，将进行手动卸载"
+        echo ""
+        manual_uninstall_bettafish
+        return
+    fi
+
+    # 显示安装历史
+    show_install_history
+
+    log_warn "此操作将卸载由脚本安装的组件"
+    echo ""
+    echo "将会卸载:"
+    echo ""
+
+    # 检查要卸载的组件
+    local will_uninstall_docker=false
+    local will_uninstall_bettafish=false
+    local source_dir=""
+
+    # 读取安装历史判断
+    if grep -A5 "^\[docker\]" "$INSTALL_HISTORY_FILE" | grep -q "installed_by_script=true"; then
+        will_uninstall_docker=true
+        echo -e "  ${RED}✗${NC} Docker Desktop (脚本安装)"
+    fi
+
+    if grep -A5 "^\[bettafish\]" "$INSTALL_HISTORY_FILE" | grep -q "installed_by_script=true"; then
+        will_uninstall_bettafish=true
+        source_dir=$(grep -A5 "^\[bettafish\]" "$INSTALL_HISTORY_FILE" | grep "^source_dir=" | cut -d'=' -f2)
+        echo -e "  ${RED}✗${NC} BettaFish 容器和镜像"
+        [ -n "$source_dir" ] && echo -e "  ${RED}✗${NC} 源码目录: $source_dir"
+    fi
+
+    echo ""
+    echo "不会卸载:"
+    echo ""
+
+    if grep -A5 "^\[homebrew\]" "$INSTALL_HISTORY_FILE" | grep -q "existed_before=true"; then
+        echo -e "  ${GREEN}✓${NC} Homebrew (安装前已存在)"
+    fi
+
+    if grep -A5 "^\[git\]" "$INSTALL_HISTORY_FILE" | grep -q "existed_before=true"; then
+        echo -e "  ${GREEN}✓${NC} Git (安装前已存在)"
+    fi
+
+    echo ""
+    printf "${RED}确认卸载? (请输入 UNINSTALL 确认): ${NC}"
+    read CONFIRM
+
+    if [[ "$CONFIRM" != "UNINSTALL" ]]; then
+        log_info "取消卸载"
+        echo ""
+        return
+    fi
+
+    echo ""
+    log_info "开始卸载..."
+    echo ""
+
+    # 卸载 BettaFish
+    if [ "$will_uninstall_bettafish" == "true" ]; then
+        log_info "停止并删除 BettaFish 容器..."
+        docker-compose -f "$source_dir/docker-compose.yml" down 2>/dev/null || true
+        docker ps -a | grep bettafish | awk '{print $1}' | xargs -r docker rm -f 2>/dev/null || true
+
+        log_info "删除 BettaFish 镜像..."
+        docker images | grep bettafish | awk '{print $3}' | xargs -r docker rmi -f 2>/dev/null || true
+
+        if [ -n "$source_dir" ] && [ -d "$source_dir" ]; then
+            printf "${YELLOW}是否删除源码目录? [y/N]: ${NC}"
+            read DELETE_SOURCE
+            if [[ "$DELETE_SOURCE" =~ ^[Yy]$ ]]; then
+                log_info "删除源码目录: $source_dir"
+                rm -rf "$source_dir"
+                # 尝试删除父目录（如果为空）
+                rmdir "$(dirname "$source_dir")" 2>/dev/null || true
+            fi
+        fi
+
+        log_success "BettaFish 已卸载"
+    fi
+
+    # 卸载 Docker（慎重）
+    if [ "$will_uninstall_docker" == "true" ]; then
+        log_warn "即将卸载 Docker Desktop"
+        printf "${RED}再次确认卸载 Docker? [y/N]: ${NC}"
+        read CONFIRM_DOCKER
+        if [[ "$CONFIRM_DOCKER" =~ ^[Yy]$ ]]; then
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                log_info "卸载 Docker Desktop (macOS)..."
+                osascript -e 'quit app "Docker"' 2>/dev/null || true
+                rm -rf /Applications/Docker.app
+                rm -rf ~/Library/Group\ Containers/group.com.docker
+                rm -rf ~/Library/Containers/com.docker.docker
+                log_success "Docker Desktop 已卸载"
+            else
+                log_warn "Linux Docker 卸载需要手动执行"
+                echo "  sudo apt-get remove docker-ce docker-ce-cli containerd.io"
+                echo "  或"
+                echo "  sudo yum remove docker-ce docker-ce-cli containerd.io"
+            fi
+        fi
+    fi
+
+    # 删除安装历史
+    printf "${YELLOW}是否删除安装历史记录? [y/N]: ${NC}"
+    read DELETE_HISTORY
+    if [[ "$DELETE_HISTORY" =~ ^[Yy]$ ]]; then
+        rm -f "$INSTALL_HISTORY_FILE"
+        rmdir "$HOME/.bettafish" 2>/dev/null || true
+        log_success "安装历史已删除"
+    fi
+
+    echo ""
+    log_success "卸载完成！"
+    echo ""
+}
+
+# 手动卸载（无安装历史）
+manual_uninstall_bettafish() {
+    log_info "手动卸载模式"
+    echo ""
+    echo "请手动选择要删除的内容:"
+    echo ""
+    echo "1. 停止并删除所有 BettaFish 容器"
+    echo "2. 删除所有 BettaFish 镜像"
+    echo "3. 全部执行 (1+2)"
+    echo "0. 取消"
+    echo ""
+    printf "${CYAN}请选择: ${NC}"
+    read MANUAL_CHOICE
+
+    case $MANUAL_CHOICE in
+        1|3)
+            log_info "停止并删除 BettaFish 容器..."
+            docker ps -a | grep bettafish | awk '{print $1}' | xargs -r docker rm -f 2>/dev/null || true
+            log_success "容器已删除"
+            [ "$MANUAL_CHOICE" == "1" ] && return
+            ;&
+        2)
+            log_info "删除 BettaFish 镜像..."
+            docker images | grep bettafish | awk '{print $3}' | xargs -r docker rmi -f 2>/dev/null || true
+            log_success "镜像已删除"
+            ;;
+        0)
+            log_info "取消操作"
+            ;;
+        *)
+            log_error "无效选择"
+            ;;
+    esac
+    echo ""
+}
+
 # 主菜单循环
 main_menu() {
     while true; do
         get_docker_disk_usage
         show_cleanup_options
 
-        printf "${CYAN}请选择 [0-5]: ${NC}"
+        printf "${CYAN}请选择 [0-7]: ${NC}"
         read CHOICE
         echo ""
 
@@ -274,6 +579,12 @@ main_menu() {
                 ;;
             5)
                 show_stats
+                ;;
+            6)
+                show_install_history
+                ;;
+            7)
+                uninstall_bettafish
                 ;;
             0)
                 log_info "退出清理工具"

@@ -84,6 +84,109 @@ docker_cmd() {
 }
 
 # ================================
+# 安装历史记录功能
+# ================================
+
+# 安装历史文件
+INSTALL_HISTORY_DIR="$HOME/.bettafish"
+INSTALL_HISTORY_FILE="$INSTALL_HISTORY_DIR/install-history.log"
+
+# 初始化安装历史
+init_install_history() {
+    mkdir -p "$INSTALL_HISTORY_DIR"
+
+    if [ ! -f "$INSTALL_HISTORY_FILE" ]; then
+        cat > "$INSTALL_HISTORY_FILE" << EOF
+# BettaFish 安装历史记录
+# 安装时间: $(date '+%Y-%m-%d %H:%M:%S')
+# 脚本版本: v2.1
+# 安装目录: $SCRIPT_DIR
+
+[metadata]
+install_date=$(date '+%Y-%m-%d %H:%M:%S')
+script_version=v2.1
+install_dir=$SCRIPT_DIR
+
+EOF
+    fi
+}
+
+# 检查组件是否存在（安装前）
+check_component_before_install() {
+    local component=$1
+    local existed=false
+
+    case $component in
+        homebrew)
+            command -v brew &> /dev/null && existed=true
+            ;;
+        docker)
+            command -v docker &> /dev/null && existed=true
+            ;;
+        git)
+            command -v git &> /dev/null && existed=true
+            ;;
+        colima)
+            command -v colima &> /dev/null && existed=true
+            ;;
+    esac
+
+    # 记录到历史文件
+    if ! grep -q "\[$component\]" "$INSTALL_HISTORY_FILE" 2>/dev/null; then
+        cat >> "$INSTALL_HISTORY_FILE" << EOF
+
+[$component]
+existed_before=$existed
+installed_by_script=false
+install_date=
+version=
+EOF
+    fi
+}
+
+# 记录组件安装
+log_component_installation() {
+    local component=$1
+    local version=$2
+    local install_date=$(date '+%Y-%m-%d %H:%M:%S')
+
+    # 更新历史文件
+    if grep -q "\[$component\]" "$INSTALL_HISTORY_FILE" 2>/dev/null; then
+        # 使用 sed 更新现有记录
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            sed -i '' "/^\[$component\]/,/^$/s/^installed_by_script=.*/installed_by_script=true/" "$INSTALL_HISTORY_FILE"
+            sed -i '' "/^\[$component\]/,/^$/s/^install_date=.*/install_date=$install_date/" "$INSTALL_HISTORY_FILE"
+            sed -i '' "/^\[$component\]/,/^$/s/^version=.*/version=$version/" "$INSTALL_HISTORY_FILE"
+        else
+            # Linux
+            sed -i "/^\[$component\]/,/^$/s/^installed_by_script=.*/installed_by_script=true/" "$INSTALL_HISTORY_FILE"
+            sed -i "/^\[$component\]/,/^$/s/^install_date=.*/install_date=$install_date/" "$INSTALL_HISTORY_FILE"
+            sed -i "/^\[$component\]/,/^$/s/^version=.*/version=$version/" "$INSTALL_HISTORY_FILE"
+        fi
+    fi
+}
+
+# 记录 BettaFish 安装信息
+log_bettafish_installation() {
+    local source_dir=$1
+    local containers=$2
+    local images=$3
+
+    if ! grep -q "\[bettafish\]" "$INSTALL_HISTORY_FILE" 2>/dev/null; then
+        cat >> "$INSTALL_HISTORY_FILE" << EOF
+
+[bettafish]
+installed_by_script=true
+source_dir=$source_dir
+containers=$containers
+images=$images
+install_date=$(date '+%Y-%m-%d %H:%M:%S')
+EOF
+    fi
+}
+
+# ================================
 # 离线包管理功能
 # ================================
 
@@ -368,6 +471,15 @@ echo "=====================================" >> "$DEPLOY_LOG_FILE"
 # ================================
 log_step "步骤 1/7: 环境检测与依赖安装"
 log_to_file "步骤 1: 环境检测与依赖安装"
+
+# 初始化安装历史记录
+init_install_history
+
+# 记录安装前的组件状态
+check_component_before_install "homebrew"
+check_component_before_install "docker"
+check_component_before_install "git"
+check_component_before_install "colima"
 
 echo ""
 log_info "开始环境检测..."
