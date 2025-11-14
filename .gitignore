@@ -1,0 +1,37 @@
+# Deployment packages
+*.tar.gz
+*.zip
+packages/*.tar.gz
+packages/*.zip
+
+# Temporary files
+*.tmp
+*.log
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Build artifacts
+dist/
+build/
+
+# Node modules (if any)
+node_modules/
+
+# Python cache (if any)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Test files
+test-output/
+*.test
