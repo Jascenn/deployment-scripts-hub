@@ -83,6 +83,30 @@ docker_cmd() {
     fi
 }
 
+# Docker Compose 命令检测和包装器
+docker_compose_cmd() {
+    # 优先使用 docker compose (V2)
+    if docker compose version >/dev/null 2>&1; then
+        docker compose "$@"
+    # 回退到 docker-compose (V1)
+    elif command -v docker-compose >/dev/null 2>&1; then
+        docker-compose "$@"
+    else
+        log_error "未找到 docker compose 或 docker-compose 命令"
+        echo ""
+        log_info "请安装 Docker Compose:"
+        echo ""
+        echo -e "  ${CYAN}# Docker Compose V2 (推荐)${NC}"
+        echo -e "  ${CYAN}已内置在 Docker Desktop 和新版 Docker Engine 中${NC}"
+        echo ""
+        echo -e "  ${CYAN}# 或安装 V1 版本${NC}"
+        echo -e "  ${CYAN}sudo curl -L \"https://github.com/docker/compose/releases/latest/download/docker-compose-\$(uname -s)-\$(uname -m)\" -o /usr/local/bin/docker-compose${NC}"
+        echo -e "  ${CYAN}sudo chmod +x /usr/local/bin/docker-compose${NC}"
+        echo ""
+        return 1
+    fi
+}
+
 # ================================
 # 安装历史记录功能
 # ================================
@@ -2212,7 +2236,7 @@ if [ "$SHOULD_PULL" = true ]; then
     PULL_START_TIME=$(date +%s)
 
     # 拉取镜像
-    if docker-compose pull; then
+    if docker_compose_cmd pull; then
         PULL_END_TIME=$(date +%s)
         PULL_DURATION=$((PULL_END_TIME - PULL_START_TIME))
         PULL_MINUTES=$((PULL_DURATION / 60))
@@ -2261,7 +2285,7 @@ if [ "$SHOULD_PULL" = true ]; then
         log_info "常见问题排查:"
         echo "  1. 检查网络连接"
         echo "  2. 确认 Docker 已启动"
-        echo "  3. 尝试手动拉取: docker-compose pull"
+        echo -e "  3. 尝试手动拉取: ${CYAN}docker compose pull${NC}"
         echo ""
         exit 1
     fi
@@ -2280,8 +2304,8 @@ cd "$PROJECT_DIR"
 # 停止并删除旧容器（如果存在）
 log_info "清理旧容器..."
 
-# 方式 1: 尝试使用 docker-compose 停止
-docker-compose down 2>/dev/null || true
+# 方式 1: 尝试使用 docker compose 停止
+docker_compose_cmd down 2>/dev/null || true
 
 # 方式 2: 强制停止和删除容器（兼容 v1.x 手动启动的容器）
 if docker ps -a --format '{{.Names}}' | grep -qE '^(bettafish|bettafish-db)$'; then
@@ -2496,11 +2520,11 @@ else
     echo ""
 fi
 
-# ============== 使用 docker-compose 启动服务 ==============
+# ============== 使用 Docker Compose 启动服务 ==============
 if [ "$PORT_MODIFIED" = true ]; then
-    log_info "使用 docker-compose 启动所有服务 (端口: ${FINAL_PORT})..."
+    log_info "使用 Docker Compose 启动所有服务 (端口: ${FINAL_PORT})..."
 else
-    log_info "使用 docker-compose 启动所有服务..."
+    log_info "使用 Docker Compose 启动所有服务..."
 fi
 echo ""
 
@@ -2508,7 +2532,7 @@ echo ""
 START_TIME=$(date +%s)
 
 # 启动服务（后台模式）
-if docker-compose up -d; then
+if docker_compose_cmd up -d; then
     END_TIME=$(date +%s)
     DURATION=$((END_TIME - START_TIME))
 
@@ -2529,7 +2553,7 @@ if docker-compose up -d; then
     log_info "检查数据库连接..."
     DB_READY=false
     for i in {1..15}; do
-        if docker-compose exec -T db pg_isready -U bettafish >/dev/null 2>&1; then
+        if docker_compose_cmd exec -T db pg_isready -U bettafish >/dev/null 2>&1; then
             DB_READY=true
             log_success "数据库已就绪"
             break
@@ -2547,7 +2571,7 @@ if docker-compose up -d; then
     sleep 3
 
     # 获取最近的日志
-    APP_LOGS=$(docker-compose logs --tail=20 bettafish 2>&1)
+    APP_LOGS=$(docker_compose_cmd logs --tail=20 bettafish 2>&1)
 
     if echo "$APP_LOGS" | grep -qiE "error|exception|traceback|failed"; then
         log_warn "检测到应用日志中可能存在错误"
@@ -2555,7 +2579,7 @@ if docker-compose up -d; then
         echo -e "${YELLOW}最近日志（最后 10 行）:${NC}"
         echo "$APP_LOGS" | tail -10
         echo ""
-        log_info "查看完整日志: ${CYAN}docker-compose logs bettafish${NC}"
+        log_info "查看完整日志: ${CYAN}docker compose logs bettafish${NC}"
     else
         log_success "应用启动正常"
     fi
@@ -2578,14 +2602,14 @@ else
     # 显示错误日志
     log_info "查看错误日志:"
     echo ""
-    docker-compose logs --tail=30
+    docker_compose_cmd logs --tail=30
 
     echo ""
     log_info "常见问题排查:"
     echo "  1. 检查镜像是否成功拉取: docker images | grep bettafish"
     echo "  2. 检查架构是否匹配: docker inspect <image> --format='{{.Architecture}}'"
     echo "  3. 检查端口是否被占用: lsof -i :5000"
-    echo "  4. 查看完整日志: docker-compose logs"
+    echo "  4. 查看完整日志: docker compose logs"
     echo ""
     exit 1
 fi
