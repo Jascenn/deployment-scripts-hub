@@ -15,7 +15,7 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 # 显示 Logo
-# clear 命令已移除以支持 curl 管道执行
+clear
 echo -e "${BLUE}"
 cat << "EOF"
   _      ___ ___  _   _  ____ ____       _    ___
