@@ -148,10 +148,13 @@ if ! $SKIP_ENV_CHECK; then
 
     log_info "检查 Docker 是否运行..."
     if ! docker info > /dev/null 2>&1; then
-        log_error "Docker 未运行，请启动 Docker Desktop"
-        exit 1
+        log_warn "Docker 未运行，部署时需要启动 Docker Desktop"
+        echo ""
+        log_info "您可以先下载脚本，稍后启动 Docker 再执行部署"
+        echo ""
+    else
+        log_success "Docker 正在运行"
     fi
-    log_success "Docker 正在运行"
 fi
 
 # ================================
