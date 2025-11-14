@@ -246,12 +246,31 @@ fi
 
 chmod +x docker-deploy.sh
 
-# 检查是否在交互式终端中
-if [ -t 0 ] && [ -t 1 ]; then
-    # 在交互式终端中，直接执行
-    log_info "在交互式终端中执行部署脚本..."
-    echo ""
+# 直接执行部署脚本
+log_info "开始执行部署脚本..."
+echo ""
 
+# 如果从管道执行（如 curl | bash），需要重定向 stdin 到 /dev/tty 以支持交互式输入
+if [ ! -t 0 ]; then
+    # stdin 不是终端，尝试从 /dev/tty 读取（如果可用）
+    if [ -e /dev/tty ]; then
+        if ! bash ./docker-deploy.sh < /dev/tty; then
+            log_error "部署失败"
+            echo ""
+            echo "部署目录: $DEPLOY_DIR/BettaFish-main"
+            echo "您可以手动执行: cd $DEPLOY_DIR/BettaFish-main && ./docker-deploy.sh"
+            exit 1
+        fi
+    else
+        log_error "检测到非交互式环境且无法访问终端"
+        log_info "请在终端中手动执行部署脚本："
+        echo ""
+        echo -e "${BOLD}${GREEN}cd $DEPLOY_DIR/BettaFish-main && ./docker-deploy.sh${NC}"
+        echo ""
+        exit 1
+    fi
+else
+    # stdin 是终端，正常执行
     if ! bash ./docker-deploy.sh; then
         log_error "部署失败"
         echo ""
@@ -259,19 +278,6 @@ if [ -t 0 ] && [ -t 1 ]; then
         echo "您可以手动执行: cd $DEPLOY_DIR/BettaFish-main && ./docker-deploy.sh"
         exit 1
     fi
-else
-    # 非交互式环境（curl 管道），提示用户手动执行
-    log_warn "检测到非交互式环境"
-    log_info "为了获得最佳体验（进度条、颜色、交互式提示），请在终端中手动执行："
-    echo ""
-    echo -e "${BOLD}${GREEN}cd $DEPLOY_DIR/BettaFish-main && ./docker-deploy.sh${NC}"
-    echo ""
-    log_info "或者，如果您想跳过交互直接部署，可以使用："
-    echo ""
-    echo "  cd $DEPLOY_DIR/BettaFish-main"
-    echo "  docker-compose up -d"
-    echo ""
-    exit 0
 fi
 
 # ================================
