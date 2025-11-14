@@ -1575,37 +1575,77 @@ if [ -z "$PROJECT_DIR" ]; then
     log_info "正在从 GitHub 自动下载源码..."
     echo ""
 
+    GITHUB_ZIP_URL="https://github.com/666ghj/BettaFish/archive/refs/heads/main.zip"
+    GITHUB_TARGZ_URL="https://github.com/666ghj/BettaFish/archive/refs/heads/main.tar.gz"
     GITHUB_REPO="https://github.com/666ghj/BettaFish.git"
     DOWNLOAD_DIR="$SCRIPT_DIR/BettaFish-main"
+    DOWNLOAD_SUCCESS=false
 
-    # 检查 git 是否安装
-    if ! command -v git >/dev/null 2>&1; then
-        log_error "Git 未安装,无法自动下载源码"
+    # 针对 Linux 系统,优先使用 wget/curl 下载 zip/tar.gz (更快)
+    if [[ "$OS_TYPE" == "Linux" ]]; then
+        # 方案 1: wget + unzip
+        if command -v wget >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1; then
+            log_info "使用 wget 下载源码包..."
+            if wget -q --show-progress "$GITHUB_ZIP_URL" -O /tmp/bettafish-main.zip 2>&1; then
+                log_info "解压源码包..."
+                if unzip -q /tmp/bettafish-main.zip -d "$SCRIPT_DIR" && mv "$SCRIPT_DIR/BettaFish-main" "$DOWNLOAD_DIR" 2>/dev/null; then
+                    rm -f /tmp/bettafish-main.zip
+                    PROJECT_DIR="$DOWNLOAD_DIR"
+                    DOWNLOAD_SUCCESS=true
+                    log_success "源码下载完成: $PROJECT_DIR"
+                    echo ""
+                fi
+            fi
+        fi
+
+        # 方案 2: curl + tar (如果方案 1 失败)
+        if [ "$DOWNLOAD_SUCCESS" = false ] && command -v curl >/dev/null 2>&1 && command -v tar >/dev/null 2>&1; then
+            log_info "使用 curl + tar 下载源码包..."
+            if curl -L "$GITHUB_TARGZ_URL" 2>/dev/null | tar xz -C "$SCRIPT_DIR" && mv "$SCRIPT_DIR/BettaFish-main" "$DOWNLOAD_DIR" 2>/dev/null; then
+                PROJECT_DIR="$DOWNLOAD_DIR"
+                DOWNLOAD_SUCCESS=true
+                log_success "源码下载完成: $PROJECT_DIR"
+                echo ""
+            fi
+        fi
+
+        # 方案 3: git clone (如果前面都失败)
+        if [ "$DOWNLOAD_SUCCESS" = false ] && command -v git >/dev/null 2>&1; then
+            log_info "使用 git clone 下载..."
+            if git clone --depth 1 "$GITHUB_REPO" "$DOWNLOAD_DIR" >/dev/null 2>&1; then
+                PROJECT_DIR="$DOWNLOAD_DIR"
+                DOWNLOAD_SUCCESS=true
+                log_success "源码下载完成: $PROJECT_DIR"
+                echo ""
+            fi
+        fi
+    else
+        # macOS 系统,优先使用 git clone
+        if command -v git >/dev/null 2>&1; then
+            log_info "使用 git clone 下载..."
+            if git clone --depth 1 "$GITHUB_REPO" "$DOWNLOAD_DIR"; then
+                PROJECT_DIR="$DOWNLOAD_DIR"
+                DOWNLOAD_SUCCESS=true
+                log_success "源码下载完成: $PROJECT_DIR"
+                echo ""
+            fi
+        fi
+    fi
+
+    # 所有方案都失败
+    if [ "$DOWNLOAD_SUCCESS" = false ]; then
+        log_error "自动下载失败"
         echo ""
         log_info "请手动下载项目:"
         echo ""
+        echo "  ${CYAN}# 方式 1: wget (推荐)${NC}"
         echo "  ${CYAN}wget https://github.com/666ghj/BettaFish/archive/refs/heads/main.zip${NC}"
         echo "  ${CYAN}unzip main.zip${NC}"
         echo ""
-        exit 1
-    fi
-
-    # 使用 git clone 下载
-    log_info "克隆仓库: $GITHUB_REPO"
-    if git clone --depth 1 "$GITHUB_REPO" "$DOWNLOAD_DIR"; then
-        PROJECT_DIR="$DOWNLOAD_DIR"
-        log_success "源码下载完成: $PROJECT_DIR"
+        echo "  ${CYAN}# 方式 2: curl${NC}"
+        echo "  ${CYAN}curl -L https://github.com/666ghj/BettaFish/archive/refs/heads/main.tar.gz | tar xz${NC}"
         echo ""
-    else
-        log_error "Git clone 失败"
-        echo ""
-        log_info "请手动下载项目到以下位置之一:"
-        echo ""
-        echo "  ${CYAN}$SCRIPT_DIR/BettaFish-main/${NC}"
-        echo "  ${CYAN}$SCRIPT_DIR/BettaFish/${NC}"
-        echo ""
-        log_info "或从 GitHub 手动下载:"
-        echo ""
+        echo "  ${CYAN}# 方式 3: git clone${NC}"
         echo "  ${CYAN}git clone https://github.com/666ghj/BettaFish.git BettaFish-main${NC}"
         echo ""
         exit 1
