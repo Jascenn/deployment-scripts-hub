@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 chcp 65001 >nul 2>&1
 
 set "SCRIPT_DIR=%~dp0"
-set "PS_SCRIPT=%SCRIPT_DIR%diagnose.ps1"
+set "PS_SCRIPT=%SCRIPT_DIR%scriptsdiagnose.ps1"
 
 if not exist "%PS_SCRIPT%" (
     echo.
