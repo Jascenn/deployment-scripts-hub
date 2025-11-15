@@ -1,6 +1,6 @@
 # Deployment Scripts Hub
 
-> 🚀 一站式部署脚本仓库 - 收集各种项目的自动化部署脚本
+> 🚀 部署工具集合仓库 - 收集各类项目的跨平台自动化部署工具
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Maintained](https://img.shields.io/badge/Maintained-Yes-green.svg)](https://github.com/Jascenn/deployment-scripts-hub)
@@ -9,384 +9,334 @@
 
 ## 📖 简介
 
-这是一个专门用于存储和分享各种项目部署脚本的仓库。每个项目都有独立的目录，包含完整的部署工具和文档。
+这是一个专门用于存储和分享各类项目部署工具的仓库。每个项目都有独立的目录，包含完整的跨平台部署工具和中文文档。
 
-### 特点
+### 仓库特点
 
-- ✅ **一键部署** - 所有脚本支持 curl 直接执行
-- ✅ **智能检测** - 自动检测网络环境和系统配置
-- ✅ **代理支持** - 支持各种代理配置
-- ✅ **详细文档** - 每个项目都有完整的使用说明
+- ✅ **跨平台支持** - Windows、macOS、Linux 完整支持
+- ✅ **一键部署** - 简单易用的自动化部署脚本
+- ✅ **智能修复** - 自动检测和修复常见问题
+- ✅ **交互式菜单** - 图形化操作界面
+- ✅ **中文文档** - 完整的中文使用文档
 - ✅ **持续更新** - 随项目更新及时维护
 
 ---
 
 ## 🗂️ 项目列表
 
-### 1. BettaFish (AI 舆情分析系统)
+### 1. BettaFish - AI 助手部署工具包
 
-#### Linux / macOS 部署
+BettaFish 是由 [LIONCC.AI](https://lioncc.ai) 开发的 AI 助手系统。本仓库提供完整的跨平台部署工具包。
 
-**一键部署**：
-```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash
+#### 📂 项目目录
+
+```
+bettafish/
+├── Linux_macOS/          # macOS 和 Linux 部署工具
+└── Windows/              # Windows 部署工具
 ```
 
-**文档**：[bettafish/README.md](bettafish/README.md)
-
-**版本**：v2.1 | **部署时间**：5-8 分钟 | **镜像大小**：~2GB
-
-#### Windows 部署
-
-**PowerShell 部署**：
-```powershell
-# 下载并解压 Windows 部署包
-# 双击运行 docker-deploy-v4.bat
-```
-
-**项目说明**：BettaFish 是一个基于 Docker 的 AI 舆情分析系统，支持多引擎智能搜索
-
-**Windows 文档**：[bettafish/windows/README.md](bettafish/windows/README.md)
+#### 🐧 Linux / macOS 部署
 
 **特色功能**：
-- 🎯 智能舆情分析
-- 🔍 多引擎搜索（洞悉引擎、Tavily、Bocha）
-- 🐳 Docker 一键部署
-- 🌐 国内镜像加速
-- 📊 可视化 HTML 指南
-- 👶 新手用户友好
+- 🎯 交互式菜单系统
+- 🚀 一键自动部署
+- 🔍 系统诊断工具
+- 🧹 Docker 清理工具
+- 📋 路径验证工具
 
-**版本**：v4.0.3 | **部署时间**：15-20 分钟 | **镜像大小**：~3GB
+**使用方式**：
+
+```bash
+# 方法 1: 克隆仓库
+git clone https://github.com/Jascenn/deployment-scripts-hub.git
+cd deployment-scripts-hub/bettafish/Linux_macOS
+
+# 启动菜单（推荐）
+./menu.sh
+
+# 或直接部署
+./docker-deploy.sh
+```
+
+**文档**: [bettafish/Linux_macOS/README.md](bettafish/Linux_macOS/README.md)
+
+#### 🪟 Windows 部署
+
+**特色功能**：
+- 🖱️ 双击运行，无需命令行
+- 🎨 彩色 PowerShell 界面
+- 🛠️ 智能修复工具 (fix-all)
+- 📋 交互式菜单系统
+- 📖 HTML 可视化指南
+- 🗂️ Plan C 结构（scripts/ 子目录）
+
+**使用方式**：
+
+```powershell
+# 1. 克隆或下载仓库
+git clone https://github.com/Jascenn/deployment-scripts-hub.git
+
+# 2. 进入 Windows 目录
+cd deployment-scripts-hub\bettafish\Windows
+
+# 3. 双击运行
+menu.bat           # 交互式菜单（推荐）
+deploy.bat         # 快速部署
+fix-all.bat        # 智能修复
+```
+
+**文档**: [bettafish/Windows/README.md](bettafish/Windows/README.md)
+
+#### 📊 BettaFish 版本信息
+
+| 平台 | 版本 | 部署时间 | 工具数量 | 文档数量 |
+|------|------|---------|---------|---------|
+| **Linux/macOS** | v2.1.0 | 5-10 分钟 | 6 个脚本 | 5 个文档 |
+| **Windows** | v2.1.0 | 5-10 分钟 | 10 个脚本 | 7 个文档 |
+
+#### 🎯 核心功能
+
+- **AI 模型集成**: 支持 VibeCoding API、OpenAI、Claude、Gemini
+- **网络搜索**: 可选集成 Tavily API、Bocha API
+- **Docker 部署**: 基于 Docker Compose 的容器化部署
+- **镜像加速**: 支持国内镜像源加速
+- **智能诊断**: 自动检测环境问题并修复
 
 ---
 
-## 📂 目录结构
+## 📂 仓库结构
 
 ```
 deployment-scripts-hub/
 │
 ├── README.md                          # 本文件
+├── QUICK_REFERENCE.md                 # 快速参考卡片
 ├── LICENSE                            # MIT 许可证
 │
-├── bettafish/                         # BettaFish 部署工具
-│   ├── README.md                      # 项目说明 (Linux/macOS)
-│   ├── smart-deploy.sh                # 智能部署脚本 (Linux/macOS)
-│   ├── docker-deploy.sh               # Docker 部署脚本 (Linux/macOS)
-│   ├── docker-cleanup.sh              # Docker 清理脚本
-│   ├── install.sh                     # 安装脚本
-│   ├── windows/                       # Windows 部署工具
-│   │   ├── README.md                  # Windows 使用说明
-│   │   ├── START.txt                  # 快速开始指南
-│   │   ├── docker-deploy-v4.bat       # 主部署脚本（双击运行）
-│   │   ├── docker-deploy-v4.ps1       # PowerShell 部署脚本
-│   │   ├── quick-fix.bat              # 快速修复工具
-│   │   ├── download-project.bat       # 项目下载工具
-│   │   ├── debug-env.bat              # 环境诊断工具
-│   │   ├── 使用指南.html              # 可视化使用指南
-│   │   ├── 新手入门指南.html          # 新手完整教程
-│   │   ├── 打开使用指南.bat           # 打开使用指南
-│   │   ├── 打开新手指南.bat           # 打开新手指南
-│   │   └── docs-archive/              # 历史文档归档
-│   ├── packages/                      # 部署包（通过 Release 分发）
-│   └── docs/                          # 详细文档
-│       ├── quick-start.md             # 快速开始
-│       ├── advanced-config.md         # 高级配置
-│       └── troubleshooting.md         # 问题排查
-│
-├── project-template/                  # 项目模板
-│   ├── README.md                      # 模板说明
-│   ├── smart-deploy.sh.template       # 部署脚本模板
-│   └── docs/                          # 文档模板
-│
-└── scripts/                           # 通用工具脚本
-    ├── check-docker.sh                # Docker 检查
-    ├── check-network.sh               # 网络检查
-    └── proxy-config.sh                # 代理配置
+└── bettafish/                         # BettaFish 部署工具包
+    │
+    ├── Linux_macOS/                   # Linux 和 macOS 工具
+    │   ├── README.md                  # 使用说明
+    │   ├── START.txt                  # 快速开始
+    │   ├── menu.sh                    # 交互式菜单 ⭐
+    │   ├── docker-deploy.sh           # 一键部署 ⭐
+    │   ├── diagnose.sh                # 系统诊断
+    │   ├── docker-cleanup.sh          # Docker 清理
+    │   ├── validate-paths.sh          # 路径验证
+    │   ├── log-cleanup.sh             # 日志清理
+    │   ├── docs/                      # 文档目录
+    │   ├── backups/                   # 备份目录
+    │   └── offline-packages/          # 离线包目录
+    │
+    └── Windows/                       # Windows 工具
+        ├── README.md                  # 使用说明
+        ├── README.txt                 # 文本说明
+        ├── _START_HERE.txt            # 新手指南 ⭐
+        ├── START.md                   # Markdown 指南
+        ├── menu.bat                   # 交互式菜单 ⭐
+        ├── deploy.bat                 # 快速部署 ⭐
+        ├── fix-all.bat                # 智能修复 ⭐
+        ├── docker-deploy.bat          # 完整部署
+        ├── diagnose.bat               # 系统诊断
+        ├── scripts/                   # PowerShell 脚本目录
+        │   ├── menu.ps1               # 菜单脚本
+        │   ├── docker-deploy.ps1      # 部署脚本
+        │   ├── fix-all.ps1            # 修复脚本
+        │   ├── diagnose.ps1           # 诊断脚本
+        │   ├── download-project.ps1   # 下载脚本
+        │   └── fix-docker-mirrors.ps1 # 镜像源修复
+        ├── docs/                      # 文档目录
+        ├── backups/                   # 备份目录
+        ├── offline-packages/          # 离线包目录
+        └── BettaFish-main/            # BettaFish 项目源码
 ```
 
 ---
 
 ## 🚀 快速开始
 
-### 方式 1: 使用特定项目的部署脚本
+### Linux / macOS 用户
 
 ```bash
-# 查看项目列表（上方）
-# 复制对应的一键部署命令
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/PROJECT_NAME/smart-deploy.sh | bash
-```
-
-### 方式 2: 从 Release 下载
-
-```bash
-# 下载完整部署包
-curl -fsSL https://github.com/Jascenn/deployment-scripts-hub/releases/download/bettafish-v2.1/BettaFish-Deployment-Kit.tar.gz -o bettafish.tar.gz
-
-# 解压并部署
-tar -xzf bettafish.tar.gz
-cd BettaFish-Deployment-Kit
-./smart-deploy.sh
-```
-
-### 方式 3: Clone 整个仓库
-
-```bash
+# 1. 克隆仓库
 git clone https://github.com/Jascenn/deployment-scripts-hub.git
-cd deployment-scripts-hub/bettafish
-./smart-deploy.sh
+
+# 2. 进入目录
+cd deployment-scripts-hub/bettafish/Linux_macOS
+
+# 3. 启动菜单（推荐）
+./menu.sh
+
+# 或直接部署
+./docker-deploy.sh
+```
+
+### Windows 用户
+
+```powershell
+# 方法 1: 使用交互式菜单（最推荐）
+# 1. 下载或克隆仓库
+# 2. 进入 deployment-scripts-hub\bettafish\Windows
+# 3. 双击 menu.bat
+
+# 方法 2: 快速部署
+# 双击 deploy.bat
+
+# 方法 3: 遇到问题？使用智能修复
+# 双击 fix-all.bat
 ```
 
 ---
 
-## 📝 使用参数
+## 📝 系统要求
 
-所有部署脚本都支持通用参数：
+### 通用要求
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/PROJECT/smart-deploy.sh | bash -s -- [选项]
-```
+- **Docker**: Docker Desktop 20.10+ (Windows/macOS) 或 Docker Engine 20.10+ (Linux)
+- **磁盘空间**: 至少 20GB 可用空间
+- **内存**: 建议 8GB 或以上
+- **网络**: 稳定的互联网连接
 
-### 通用参数
+### API 密钥准备
 
-| 参数 | 说明 | 示例 |
-|------|------|------|
-| `--proxy` | 设置代理 | `--proxy http://127.0.0.1:7890` |
-| `--minimal` | 使用最小包 | `--minimal` |
-| `--dir` | 指定目录 | `--dir ~/myproject` |
-| `--skip-env-check` | 跳过环境检查 | `--skip-env-check` |
-| `--help` | 显示帮助 | `--help` |
+**必需的 API 密钥**（至少选择一个）:
+- VibeCoding API（推荐）- [https://vibecodingapi.ai](https://vibecodingapi.ai)
+- OpenAI API
+- Claude API
+- Gemini API
+- 其他兼容 OpenAI 格式的服务
 
-### 示例
-
-```bash
-# 使用代理部署
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --proxy http://127.0.0.1:7890
-
-# 最小化部署到指定目录
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh | bash -s -- --minimal --dir ~/bettafish
-```
+**可选的 API 密钥**（增强搜索功能）:
+- Tavily API - [https://tavily.com](https://tavily.com)
+- Bocha API - [https://bocha.ai](https://bocha.ai)
 
 ---
 
 ## 🛠️ 添加新项目
 
-### 步骤 1: 创建项目目录
+欢迎贡献新的部署工具到这个仓库！
 
-```bash
-cd deployment-scripts-hub
-mkdir -p myproject/docs
-```
+### 步骤
 
-### 步骤 2: 复制模板
+1. **Fork 本仓库**
+   ```bash
+   # 在 GitHub 上点击 Fork
+   git clone https://github.com/YOUR_USERNAME/deployment-scripts-hub.git
+   ```
 
-```bash
-cp project-template/smart-deploy.sh.template myproject/smart-deploy.sh
-cp project-template/README.md myproject/README.md
-```
+2. **创建项目目录**
+   ```bash
+   cd deployment-scripts-hub
+   mkdir -p newproject/{Linux_macOS,Windows}
+   ```
 
-### 步骤 3: 自定义脚本
+3. **添加部署脚本**
+   - 参考 `bettafish/` 的结构
+   - 为 Linux/macOS 和 Windows 分别创建工具
 
-编辑 `myproject/smart-deploy.sh`，修改：
-- 项目名称
-- 下载 URL
-- 部署逻辑
+4. **创建文档**
+   - README.md - 项目说明
+   - 使用指南
+   - 常见问题解答
 
-### 步骤 4: 创建文档
-
-在 `myproject/docs/` 下创建：
-- `quick-start.md` - 快速开始
-- `advanced-config.md` - 高级配置
-- `troubleshooting.md` - 问题排查
-
-### 步骤 5: 更新主 README
-
-在本文件的"项目列表"中添加新项目信息。
-
-### 步骤 6: 提交
-
-```bash
-git add myproject/
-git commit -m "Add myproject deployment scripts"
-git push
-```
-
----
-
-## 📦 Release 规范
-
-### 命名规范
-
-```
-{project-name}-v{version}
-```
-
-**示例**：`bettafish-v2.1`
-
-### 文件规范
-
-每个 Release 应包含：
-
-1. **完整部署包** - `{ProjectName}-Deployment-Kit.tar.gz`
-2. **最小核心包** - `{ProjectName}-Minimal.tar.gz`
-3. **部署脚本** - `smart-deploy.sh`
-4. **SHA256 校验** - `*.sha256`
-5. **变更日志** - Release Notes
-
-### 创建 Release 示例
-
-```bash
-# 创建部署包
-cd bettafish
-./create-package.sh
-
-# 创建 Release
-gh release create bettafish-v2.1 \
-    packages/BettaFish-Deployment-Kit.tar.gz \
-    packages/BettaFish-Minimal.tar.gz \
-    smart-deploy.sh \
-    --title "BettaFish Deployment Kit v2.1" \
-    --notes "$(cat CHANGELOG.md)"
-```
-
----
-
-## 🔐 安全建议
-
-### 1. 验证脚本来源
-
-始终从官方仓库下载：
-```bash
-https://github.com/Jascenn/deployment-scripts-hub
-```
-
-### 2. 先查看再执行
-
-```bash
-# 下载脚本
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/smart-deploy.sh -o deploy.sh
-
-# 查看内容
-cat deploy.sh
-
-# 确认安全后执行
-bash deploy.sh
-```
-
-### 3. 使用 SHA256 校验
-
-```bash
-# 下载校验和
-curl -fsSL https://github.com/Jascenn/deployment-scripts-hub/releases/download/bettafish-v2.1/BettaFish-Deployment-Kit.tar.gz.sha256
-
-# 验证文件
-sha256sum -c BettaFish-Deployment-Kit.tar.gz.sha256
-```
-
-### 4. 使用 HTTPS
-
-所有 URL 都使用 HTTPS 协议。
+5. **提交 Pull Request**
+   ```bash
+   git add newproject/
+   git commit -m "Add newproject deployment toolkit"
+   git push origin main
+   ```
 
 ---
 
 ## 🤝 贡献指南
 
-欢迎贡献新的部署脚本或改进现有脚本！
-
-### 贡献流程
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/new-project`)
-3. 提交更改 (`git commit -m 'Add new project deployment'`)
-4. 推送到分支 (`git push origin feature/new-project`)
-5. 创建 Pull Request
-
 ### 代码规范
 
-- ✅ 所有脚本必须支持 `--help` 参数
+- ✅ 脚本必须支持 `--help` 参数
 - ✅ 必须包含详细的错误处理
-- ✅ 必须支持 `--proxy` 参数
-- ✅ 必须有完整的 README 文档
-- ✅ 必须通过 shellcheck 检查
+- ✅ 必须有完整的中文文档
+- ✅ Windows 脚本必须支持双击运行
+- ✅ Shell 脚本通过 shellcheck 检查
+
+### 文档规范
+
+- ✅ README.md 必须包含使用说明
+- ✅ 必须提供快速开始指南
+- ✅ 必须包含常见问题解答
+- ✅ 建议提供截图或演示
 
 ### 提交规范
 
 ```
 <type>(<scope>): <subject>
 
-<type>: feat, fix, docs, style, refactor, test, chore
-<scope>: 项目名称或 all
-<subject>: 简短描述
-```
+类型 (type):
+- feat: 新功能
+- fix: 修复
+- docs: 文档
+- refactor: 重构
+- test: 测试
 
-**示例**：
-```
-feat(bettafish): Add proxy auto-detection
-fix(bettafish): Fix network timeout issue
-docs(all): Update README with new examples
+范围 (scope): 项目名称或 all
+
+示例:
+feat(bettafish): Add intelligent fix-all tool for Windows
+fix(bettafish): Fix encoding issues in PowerShell scripts
+docs(all): Update README with new structure
 ```
 
 ---
 
 ## 📊 项目统计
 
-| 项目 | 版本 | 平台 | 脚本数 | 文档数 | 部署时间 | 成功率 |
-|------|------|------|--------|--------|----------|--------|
-| BettaFish | v2.1 | Linux/macOS | 3 | 6 | 5-8分钟 | 95% |
-| BettaFish | v4.0.3 | Windows | 12 | 15+ | 15-20分钟 | 98% |
-| _(待添加)_ | - | - | - | - | - | - |
-
----
-
-## 🌐 国内访问
-
-### Gitee 镜像（自动同步）
-
-```bash
-# 使用 Gitee 镜像
-curl -fsSL https://gitee.com/Jascenn/deployment-scripts-hub/raw/main/bettafish/smart-deploy.sh | bash
-```
-
-所有脚本会自动检测网络环境，优先使用国内镜像源。
+| 项目 | 平台 | 版本 | 脚本数 | 文档数 | 成功率 |
+|------|------|------|-------|-------|--------|
+| BettaFish | Linux/macOS | v2.1.0 | 6 | 5 | 95% |
+| BettaFish | Windows | v2.1.0 | 10 | 7 | 98% |
 
 ---
 
 ## ❓ 常见问题
 
-### Q1: 所有项目都支持一键部署吗？
+### Q1: 这个仓库是做什么的？
 
-**A**: 是的，仓库中的所有项目都支持 curl 一键部署。
+**A**: 这是一个部署工具集合仓库，专门收集各类项目的跨平台自动化部署工具。目前包含 BettaFish AI 助手的完整部署工具包，未来会添加更多项目。
 
-### Q2: 如何更新已部署的项目？
+### Q2: 所有工具都支持哪些平台？
 
-**A**: 每个项目的 README 中都有更新说明，通常是：
-```bash
-cd project-directory
-docker-compose pull
-docker-compose up -d
-```
-
-### Q3: 脚本支持哪些操作系统？
-
-**A**:
+**A**: 目前所有工具都支持：
+- ✅ Windows (原生 BAT/PowerShell)
 - ✅ macOS (Intel & Apple Silicon)
-- ✅ Linux (Ubuntu, Debian, CentOS, etc.)
-- ✅ Windows (原生 PowerShell + WSL2)
-  - BettaFish 支持 Windows 原生部署（PowerShell 脚本）
-  - 其他项目支持 WSL2
+- ✅ Linux (Ubuntu, Debian, CentOS 等主流发行版)
 
-### Q4: 需要什么前置条件？
+### Q3: 需要什么技术背景？
 
-**A**: 大多数项目需要：
-- Docker Desktop (或 Docker Engine + Docker Compose)
-- 稳定的网络连接
-- 足够的磁盘空间（具体见项目说明）
+**A**: 不需要！所有工具都设计为用户友好：
+- Windows: 双击 .bat 文件即可
+- macOS/Linux: 运行 .sh 脚本
+- 提供交互式菜单和详细提示
+
+### Q4: 如何更新已部署的项目？
+
+**A**: 每个项目的 README 中都有更新说明。通常步骤：
+```bash
+# 拉取最新代码
+cd deployment-scripts-hub
+git pull
+
+# 重新运行部署脚本
+cd bettafish/Linux_macOS
+./docker-deploy.sh
+```
 
 ### Q5: 遇到问题怎么办？
 
 **A**:
-1. 查看项目的 `docs/troubleshooting.md`
-2. 搜索 [Issues](https://github.com/Jascenn/deployment-scripts-hub/issues)
-3. 创建新 Issue
+1. 查看项目的 README 和文档
+2. Windows 用户可以运行 `fix-all.bat` 自动修复
+3. 搜索 [Issues](https://github.com/Jascenn/deployment-scripts-hub/issues)
+4. 创建新 Issue 寻求帮助
 
 ---
 
@@ -400,39 +350,64 @@ docker-compose up -d
 
 ## 🔗 相关链接
 
-- **官方仓库**: https://github.com/Jascenn/deployment-scripts-hub
+### 官方资源
+
+- **GitHub 仓库**: https://github.com/Jascenn/deployment-scripts-hub
 - **问题反馈**: https://github.com/Jascenn/deployment-scripts-hub/issues
-- **讨论区**: https://github.com/Jascenn/deployment-scripts-hub/discussions
-- **Wiki**: https://github.com/Jascenn/deployment-scripts-hub/wiki
+- **Pull Requests**: https://github.com/Jascenn/deployment-scripts-hub/pulls
+
+### BettaFish 相关
+
+- **BettaFish 项目**: https://github.com/666ghj/BettaFish
+- **VibeCoding API**: https://vibecodingapi.ai
+- **LIONCC.AI**: https://lioncc.ai
+
+### 博客文章
+
+- **CodeCodex 博客**: https://codecodex.ai
+- **BettaFish 一键部署指南**: https://codecodex.ai/2025-11-16/bettafish-cross-platform-deployment-toolkit.html
 
 ---
 
 ## 🎯 Roadmap
 
-### v1.0 (当前)
-- ✅ BettaFish 部署脚本
-- ✅ 项目模板
-- ✅ 通用工具脚本
-- ✅ 完整文档
+### 当前版本 v1.0
 
-### v1.1 (计划中)
-- ⏳ 添加更多项目
-- ⏳ Web 界面（脚本选择器）
-- ⏳ 自动化测试 CI/CD
-- ⏳ Docker 镜像加速器配置
+- ✅ BettaFish 跨平台部署工具包
+- ✅ Windows 智能修复系统
+- ✅ 交互式菜单系统
+- ✅ 完整中文文档
 
-### v2.0 (远期)
-- ⏳ 支持 Kubernetes 部署
+### 计划中 v1.1
+
+- ⏳ 添加更多项目部署工具
+- ⏳ 创建 Release 版本
+- ⏳ 添加 Gitee 镜像（国内加速）
+- ⏳ Web 文档页面
+
+### 远期计划 v2.0
+
+- ⏳ CLI 工具开发
 - ⏳ 可视化部署监控
-- ⏳ 多语言支持
+- ⏳ 多语言支持（English）
+- ⏳ 社区贡献模板
 
 ---
 
 ## 📞 联系方式
 
-- **维护者**: Your Name
-- **邮箱**: your.email@example.com
-- **博客**: https://your-blog.com
+- **维护者**: LingYi（凌一）
+- **博客**: https://lingyi.bio
+- **GitHub**: [@Jascenn](https://github.com/Jascenn)
+- **邮箱**: darkerrouge@gmail.com
+
+### 技术支持
+
+通过 CodeCodex 技术社群可获得：
+- ✅ 部署工具包技术支持
+- ✅ VibeCoding API 优惠
+- ✅ 部署问题排查帮助
+- ✅ 配置优化建议
 
 ---
 
@@ -444,6 +419,10 @@ docker-compose up -d
 
 ---
 
-**最后更新**: 2025-01-14
+**最后更新**: 2025-11-16
 **仓库版本**: v1.0
 **维护状态**: ✅ 积极维护中
+
+---
+
+**祝您使用愉快！** 🚀
