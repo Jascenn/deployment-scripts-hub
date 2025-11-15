@@ -1,0 +1,16 @@
+BettaFish Offline Images
+========================
+
+Export Date: 2025-11-13 22:49:12
+Export Host: WendeMacBook-Pro.local
+
+Images:
+- bettafish:latest (4.89GB)
+- postgres:15-alpine (378MB)
+
+Total Size:   0B
+
+Usage:
+  1. Copy offline-images/ directory to target machine
+  2. Run: ./load-images.sh
+  3. Run: docker-compose up -d

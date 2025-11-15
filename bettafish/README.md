@@ -1,405 +1,159 @@
-# BettaFish 部署工具
+# BettaFish 部署工具包
 
-> 🐟 基于 Docker 的 AI 对话系统 - 一键部署工具包
+一键部署 BettaFish 舆情分析系统的完整解决方案。
 
----
+## 🚀 快速开始
 
-## 🚀 一键部署
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash
-```
-
-**就这么简单！** 5-8 分钟后访问 http://localhost:8501
-
----
-
-## 📋 目录
-
-- [快速开始](#-快速开始)
-- [使用参数](#-使用参数)
-- [前置要求](#-前置要求)
-- [部署方式](#-部署方式)
-- [高级配置](#-高级配置)
-- [问题排查](#-问题排查)
-- [版本历史](#-版本历史)
-
----
-
-## 🎯 快速开始
-
-### 方式 1: 一键部署（推荐）
+### Linux / macOS
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash
-```
+# 1. 下载部署工具包
+wget https://github.com/your-repo/BettaFish-Deployment-Kit/releases/latest/download/BettaFish-Deployment-Kit.tar.gz
+tar -xzf BettaFish-Deployment-Kit.tar.gz
+cd BettaFish-Deployment-Kit
 
-### 方式 2: 使用代理
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --proxy http://127.0.0.1:7890
-```
-
-### 方式 3: 指定安装目录
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --dir ~/my-bettafish
-```
-
-### 方式 4: 手动部署
-
-```bash
-# 1. 克隆 BettaFish 源码
-git clone https://github.com/666ghj/BettaFish.git
-
-# 2. 下载部署脚本
-cd BettaFish
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/docker-deploy.sh -o docker-deploy.sh
+# 2. 一键部署
 chmod +x docker-deploy.sh
-
-# 3. 执行部署
 ./docker-deploy.sh
+
+# 3. 访问服务
+# 脚本会自动显示访问地址
 ```
+
+### Windows
+
+```powershell
+# 1. 下载并解压部署工具包
+# 2. 进入 Windows-Version 目录
+# 3. 双击运行 docker-deploy.bat
+
+# 或在 PowerShell 中执行：
+cd BettaFish-Deployment-Kit\Windows-Version
+.\docker-deploy.bat
+```
+
+📖 **详细说明**: [Windows 部署指南](Windows-Version/README-Windows.md)
+
+**就这么简单！** 脚本会自动完成：
+- ✅ 环境检测和依赖安装
+- ✅ Docker 镜像源智能选择
+- ✅ 镜像拉取和版本管理
+- ✅ 端口冲突自动处理
+- ✅ 防火墙自动配置
+- ✅ 服务健康检查
 
 ---
 
-## 🛠️ 使用参数
+## 📚 文档导航
 
-### 所有支持的参数
+### 使用指南
+- [快速开始](docs/guides/快速开始指南.md) - 5分钟部署指南
+- [故障排查](docs/guides/故障排查指南.md) - 常见问题解决
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- [选项]
-```
+### 解决方案
+- [离线部署](docs/solutions/offline-deploy.md) - 内网环境部署
+- [Docker 镜像加速](docs/solutions/docker-mirror.md) - 解决拉取慢的问题
+- [端口冲突处理](docs/solutions/port-conflict.md) - 自动端口管理
+- [云安全组配置](docs/solutions/cloud-security.md) - 阿里云/腾讯云/华为云配置
 
-| 参数 | 说明 | 示例 |
+### 技术文档
+- [系统架构](docs/technical/核心架构.md) - 技术架构说明
+- [更新日志](CHANGELOG.md) - 版本更新记录
+
+---
+
+## 🎯 核心特性
+
+### 1. 智能镜像源选择
+自动测速并选择最快的 Docker 镜像源（国内优先南京大学镜像）
+
+### 2. 端口智能管理
+- 自动检测端口占用
+- 自动查找可用端口 (5000-5010)
+- 记住配置，下次直接使用
+
+### 3. 版本智能管理
+- 自动检测本地镜像版本
+- 对比远程最新版本
+- 智能推荐是否更新
+
+### 4. 防火墙自动配置
+- 自动检测 firewalld/ufw
+- 一键开放所需端口
+- 云安全组配置提醒
+
+---
+
+## 🛠️ 工具脚本
+
+| 脚本 | 功能 | 使用 |
 |------|------|------|
-| `--proxy PROXY` | 设置代理 | `--proxy http://127.0.0.1:7890` |
-| `--dir DIR` | 指定安装目录 | `--dir ~/bettafish` |
-| `--skip-env-check` | 跳过环境检查 | `--skip-env-check` |
-| `--help` | 显示帮助信息 | `--help` |
-
-### 组合示例
-
-```bash
-# 使用代理 + 指定目录
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- \
-  --proxy http://127.0.0.1:7890 \
-  --dir ~/my-bettafish
-```
+| `docker-deploy.sh` | 一键部署 | `./docker-deploy.sh` |
+| `docker-cleanup.sh` | 清理工具 | `./docker-cleanup.sh` |
+| `diagnose.sh` | 诊断工具 | `./diagnose.sh` |
 
 ---
 
-## ✅ 前置要求
+## 📋 系统要求
 
-### 必需
+### 最低配置
+- **CPU**: 2核
+- **内存**: 4GB
+- **磁盘**: 20GB
+- **系统**: Ubuntu 20.04+ / CentOS 7+ / macOS
 
-- **Docker Desktop** (macOS/Windows) 或 **Docker Engine** (Linux)
-  - 下载：https://www.docker.com/products/docker-desktop
-  - Docker 必须正在运行
+### 推荐配置
+- **CPU**: 4核+
+- **内存**: 8GB+
+- **磁盘**: 50GB+
 
-### 系统要求
-
-| 项目 | 最低要求 | 推荐配置 |
-|------|---------|---------|
-| **CPU** | 2 核 | 4 核+ |
-| **内存** | 4GB | 8GB+ |
-| **磁盘** | 5GB | 10GB+ |
-| **系统** | macOS 10.14+ / Ubuntu 18.04+ / Windows 10+ | 最新版本 |
-
-### 网络要求
-
-- 稳定的网络连接
-- 需要访问 ghcr.io（GitHub Container Registry）
-- 国内网络建议使用代理
+### 软件依赖
+- Docker ≥ 20.10
+- Docker Compose ≥ 2.0
+- curl, wget (自动安装)
 
 ---
 
-## 📦 部署方式
+## 🌐 服务端口
 
-### 方式对比
-
-| 方式 | 下载大小 | 部署时间 | 包含内容 | 推荐场景 |
-|------|---------|---------|---------|---------|
-| **一键安装** | ~20MB | 5-8分钟 | 自动下载源码+脚本 | 最简单 ⭐ |
-| **手动部署** | ~20MB | 5-8分钟 | 完整控制 | 有经验用户 |
-
-### 网络环境
-
-脚本会自动检测网络环境：
-- ✅ 国际网络 → 使用 GitHub
-- ✅ 国内网络 → 自动切换到 Gitee 镜像
+| 服务 | 端口 | 说明 |
+|------|------|------|
+| BettaFish 主服务 | 5000 | Web 界面 |
+| Insight Engine | 8501 | Streamlit 应用 |
+| Media Engine | 8502 | Streamlit 应用 |
+| Query Engine | 8503 | Streamlit 应用 |
+| PostgreSQL | 5444 | 数据库（内部） |
 
 ---
 
-## 🔧 高级配置
+## 💡 常见问题
 
-### 1. 配置 API 密钥
+### Q: Docker Hub 拉取很慢怎么办？
+A: 脚本已内置镜像加速，自动选择最快源。详见 [Docker 镜像加速](docs/solutions/docker-mirror.md)
 
-部署完成后，需要配置至少一个 LLM API：
+### Q: 端口 5000 被占用怎么办？
+A: 脚本会自动检测并切换到 5001-5010。详见 [端口冲突处理](docs/solutions/port-conflict.md)
 
-```bash
-cd BettaFish-main
+### Q: 云服务器无法访问怎么办？
+A: 需要配置云安全组开放端口。详见 [云安全组配置](docs/solutions/cloud-security.md)
 
-# 复制配置模板
-cp .env.example .env
-
-# 编辑配置文件
-nano .env
-```
-
-**支持的 API**：
-- OpenAI API
-- Azure OpenAI
-- Anthropic Claude
-- 其他兼容 OpenAI 的 API
-
-### 2. 自定义端口
-
-默认端口：`8501`
-
-修改端口：
-```bash
-# 编辑 docker-compose.yml
-cd BettaFish-main
-nano docker-compose.yml
-
-# 修改 ports 配置
-ports:
-  - "8888:8501"  # 改为 8888
-
-# 重启
-docker-compose down
-docker-compose up -d
-```
-
-### 3. 持久化数据
-
-数据存储在 Docker 卷中：
-
-```bash
-# 查看卷
-docker volume ls | grep bettafish
-
-# 备份数据
-docker run --rm -v bettafish_data:/data -v $(pwd):/backup alpine tar czf /backup/bettafish-backup.tar.gz /data
-
-# 恢复数据
-docker run --rm -v bettafish_data:/data -v $(pwd):/backup alpine tar xzf /backup/bettafish-backup.tar.gz -C /
-```
-
-### 4. 代理配置
-
-#### Clash
-```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --proxy http://127.0.0.1:7890
-```
-
-#### v2rayN
-```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --proxy http://127.0.0.1:10809
-```
-
-#### Shadowsocks
-```bash
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --proxy socks5://127.0.0.1:1080
-```
-
-更多配置：[docs/advanced-config.md](docs/advanced-config.md)
+### Q: 如何在内网环境部署？
+A: 使用离线部署方案。详见 [离线部署](docs/solutions/offline-deploy.md)
 
 ---
 
-## 🐛 问题排查
+## 📞 支持与反馈
 
-### 常见问题
-
-#### 1. Docker 未运行
-
-**错误**：`Cannot connect to the Docker daemon`
-
-**解决**：
-```bash
-# macOS/Windows
-启动 Docker Desktop
-
-# Linux
-sudo systemctl start docker
-```
-
-#### 2. 端口被占用
-
-**错误**：`Bind for 0.0.0.0:8501 failed: port is already allocated`
-
-**解决**：
-```bash
-# 查看占用进程
-lsof -i :8501
-
-# 停止占用进程或修改端口（见上方"自定义端口"）
-```
-
-#### 3. 网络超时
-
-**错误**：`Failed to pull image` 或 `Connection timeout`
-
-**解决**：
-```bash
-# 使用代理
-curl -fsSL https://raw.githubusercontent.com/Jascenn/deployment-scripts-hub/main/bettafish/install.sh | bash -s -- --proxy http://127.0.0.1:7890
-
-# 或配置 Docker 镜像加速器（国内）
-# 见 docs/troubleshooting.md
-```
-
-#### 4. 权限问题（Linux）
-
-**错误**：`Permission denied`
-
-**解决**：
-```bash
-# 添加用户到 docker 组
-sudo usermod -aG docker $USER
-
-# 重新登录生效
-```
-
-更多问题：[docs/troubleshooting.md](docs/troubleshooting.md)
-
----
-
-## 📚 详细文档
-
-- [快速开始指南](docs/quick-start.md) - 5 分钟上手
-- [高级配置](docs/advanced-config.md) - API、端口、数据备份
-- [问题排查](docs/troubleshooting.md) - 常见问题和解决方案
-- [开发指南](docs/development.md) - 二次开发和自定义
-- [更新日志](CHANGELOG.md) - 版本变更历史
-
----
-
-## 🔄 常用命令
-
-### 启动/停止
-
-```bash
-cd BettaFish-main
-
-# 启动
-docker-compose up -d
-
-# 停止
-docker-compose down
-
-# 重启
-docker-compose restart
-
-# 查看状态
-docker-compose ps
-```
-
-### 查看日志
-
-```bash
-# 查看所有日志
-docker-compose logs
-
-# 实时查看
-docker-compose logs -f
-
-# 查看最近 100 行
-docker-compose logs --tail 100
-```
-
-### 更新
-
-```bash
-cd BettaFish-main
-
-# 拉取最新镜像
-docker-compose pull
-
-# 重新启动
-docker-compose up -d
-```
-
-### 清理
-
-```bash
-# 停止并删除容器
-docker-compose down
-
-# 同时删除数据卷（⚠️ 会清除所有数据）
-docker-compose down -v
-
-# 清理未使用的镜像
-docker image prune -a
-```
-
----
-
-## 📊 版本历史
-
-### v2.1 (2025-01-14) - 当前版本
-
-**新功能**：
-- ✨ 智能代理配置
-- ✨ 网络环境自动检测
-- ✨ 镜像清理用户确认
-
-**优化**：
-- 🔧 修复 ANSI 颜色显示
-- 🔧 优化镜像清理逻辑
-- 📚 更新可视化文档
-
-### v2.0 (2025-01-13)
-
-**新功能**：
-- ✨ Docker 镜像源选择
-- ✨ 智能端口检测
-- ✨ 进度显示优化
-
-### v1.0 (2025-01-12)
-
-- 🎉 初始版本
-
-完整变更：[CHANGELOG.md](CHANGELOG.md)
-
----
-
-## 🔗 相关链接
-
-- **官方项目**: https://github.com/666ghj/BettaFish
-- **本脚本仓库**: https://github.com/Jascenn/deployment-scripts-hub
-- **问题反馈**: https://github.com/Jascenn/deployment-scripts-hub/issues
-- **讨论区**: https://github.com/Jascenn/deployment-scripts-hub/discussions
+- **问题反馈**: [GitHub Issues](https://github.com/your-repo/issues)
+- **文档贡献**: [贡献指南](CONTRIBUTING.md)
+- **更新日志**: [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
 ## 📄 许可证
 
-本部署脚本采用 MIT License。
-
-BettaFish 项目本身的许可证请查看：https://github.com/666ghj/BettaFish
+MIT License - 详见 [LICENSE](LICENSE)
 
 ---
 
-## 🙏 鸣谢
-
-- **BettaFish 项目**: https://github.com/666ghj/BettaFish
-- 所有贡献者和用户
-
----
-
-## 📞 支持
-
-遇到问题？
-
-1. 查看 [问题排查文档](docs/troubleshooting.md)
-2. 搜索 [Issues](https://github.com/Jascenn/deployment-scripts-hub/issues)
-3. 创建新 [Issue](https://github.com/Jascenn/deployment-scripts-hub/issues/new)
-4. 加入 [讨论区](https://github.com/Jascenn/deployment-scripts-hub/discussions)
-
----
-
-**维护者**: Your Name
-**最后更新**: 2025-01-14
-**状态**: ✅ 积极维护中
+**Powered by LIONCC.AI © 2025**
