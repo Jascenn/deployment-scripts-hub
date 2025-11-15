@@ -45,12 +45,12 @@ progress_bar() {
     local filled=$((width * current / total))
     local empty=$((width - filled))
 
-    # 生成进度条字符
-    local filled_bar=$(printf "%${filled}s" | tr ' ' '█')
-    local empty_bar=$(printf "%${empty}s" | tr ' ' '░')
+    # 生成进度条字符（使用兼容性更好的字符）
+    local filled_bar=$(printf "%${filled}s" | tr ' ' '=')
+    local empty_bar=$(printf "%${empty}s" | tr ' ' '-')
 
     # 使用 echo -ne 代替 printf 以确保 Linux 兼容性
-    echo -ne "\r${CYAN}[${NC}${filled_bar}${empty_bar}${CYAN}]${NC} ${BOLD}$(printf "%3d" $percentage)%%${NC}"
+    echo -ne "\r${CYAN}[${filled_bar}>${empty_bar}]${NC} ${BOLD}$(printf "%3d" $percentage)%%${NC}"
 }
 
 # 旋转动画
@@ -2001,9 +2001,6 @@ echo ""
 REGISTRY_URLS=(
     "ghcr.io/666ghj/bettafish:latest|https://ghcr.io/v2/|官方源 (ghcr.io)"
     "ghcr.nju.edu.cn/666ghj/bettafish:latest|https://ghcr.nju.edu.cn/v2/|南京大学镜像 (ghcr.nju.edu.cn)"
-    "docker.io/666ghj/bettafish:latest|https://registry-1.docker.io/v2/|Docker Hub 官方"
-    "registry.cn-hangzhou.aliyuncs.com/666ghj/bettafish:latest|https://registry.cn-hangzhou.aliyuncs.com/v2/|阿里云杭州"
-    "registry.cn-shanghai.aliyuncs.com/666ghj/bettafish:latest|https://registry.cn-shanghai.aliyuncs.com/v2/|阿里云上海"
 )
 
 # 测试单个镜像源的网络速度
@@ -2158,30 +2155,110 @@ elif [ "$ARCH_MISMATCH" = true ]; then
     log_info "将自动拉取正确架构的镜像"
     SHOULD_PULL=true
 else
-    # 有镜像且架构匹配，提供网络状况建议
-    if [ "$BEST_TIME" -lt 1000 ]; then
-        # 网络很好 (< 1秒)
-        echo -e "${GREEN}✓${NC} 网络状况良好 (${BEST_TIME}ms)，建议更新到最新镜像"
-    elif [ "$BEST_TIME" -lt 3000 ]; then
-        # 网络一般 (1-3秒)
-        echo -e "${YELLOW}○${NC} 网络状况一般 (${BEST_TIME}ms)，可选择更新镜像"
-    else
-        # 网络较差 (> 3秒) 或超时
-        echo -e "${RED}✗${NC} 网络状况较差，建议使用现有镜像"
+    # 检查镜像是否需要更新
+    log_info "检查镜像版本..."
+
+    # 获取本地镜像信息
+    LOCAL_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$EXISTING_IMAGE" 2>/dev/null | cut -d'@' -f2)
+    LOCAL_CREATED=$(docker inspect --format='{{.Created}}' "$EXISTING_IMAGE" 2>/dev/null | cut -d'T' -f1)
+    LOCAL_SIZE=$(docker inspect --format='{{.Size}}' "$EXISTING_IMAGE" 2>/dev/null | awk '{printf "%.2f GB", $1/1024/1024/1024}')
+
+    # 显示本地镜像信息
+    echo ""
+    echo -e "${CYAN}本地镜像信息:${NC}"
+    echo -e "  创建时间: ${LOCAL_CREATED}"
+    echo -e "  镜像大小: ${LOCAL_SIZE}"
+
+    # 计算镜像年龄
+    if [ -n "$LOCAL_CREATED" ]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            LOCAL_TIMESTAMP=$(date -j -f "%Y-%m-%d" "$LOCAL_CREATED" "+%s" 2>/dev/null || echo "0")
+        else
+            LOCAL_TIMESTAMP=$(date -d "$LOCAL_CREATED" "+%s" 2>/dev/null || echo "0")
+        fi
+        CURRENT_TIMESTAMP=$(date "+%s")
+        AGE_DAYS=$(( (CURRENT_TIMESTAMP - LOCAL_TIMESTAMP) / 86400 ))
+
+        if [ "$AGE_DAYS" -le 7 ]; then
+            echo -e "  镜像年龄: ${GREEN}${AGE_DAYS} 天 (较新)${NC}"
+        elif [ "$AGE_DAYS" -le 30 ]; then
+            echo -e "  镜像年龄: ${YELLOW}${AGE_DAYS} 天${NC}"
+        else
+            echo -e "  镜像年龄: ${RED}${AGE_DAYS} 天 (建议更新)${NC}"
+        fi
     fi
-    echo ""
 
-    printf "${YELLOW}是否重新拉取最新镜像? [y/N] (回车默认 N): ${NC}"
-    read REBUILD_CHOICE
-    REBUILD_CHOICE=$(echo "$REBUILD_CHOICE" | tr '[:upper:]' '[:lower:]')
-    echo ""
+    # 尝试获取远程最新镜像的 Digest（不实际下载）
+    REMOTE_DIGEST=""
+    if timeout 10 docker manifest inspect "$BEST_REGISTRY" 2>/dev/null | grep -q '"digest"'; then
+        REMOTE_DIGEST=$(docker manifest inspect "$BEST_REGISTRY" 2>/dev/null | grep '"digest"' | head -1 | cut -d'"' -f4)
+    fi
 
-    if [[ "$REBUILD_CHOICE" == "y" ]]; then
-        log_info "准备重新拉取镜像..."
-        SHOULD_PULL=true
+    # 比较版本
+    VERSION_STATUS="unknown"
+    echo ""
+    if [ -n "$LOCAL_DIGEST" ] && [ -n "$REMOTE_DIGEST" ]; then
+        if [ "$LOCAL_DIGEST" = "$REMOTE_DIGEST" ]; then
+            VERSION_STATUS="latest"
+            echo -e "${GREEN}✓ 镜像已是最新版本${NC}"
+        else
+            VERSION_STATUS="outdated"
+            echo -e "${YELLOW}⚠️  发现新版本可用${NC}"
+        fi
     else
-        log_info "跳过拉取，使用现有镜像"
-        SHOULD_PULL=false
+        echo -e "${YELLOW}○ 无法连接到远程仓库检查更新${NC}"
+    fi
+
+    echo ""
+
+    # 根据镜像年龄和版本状况给出建议
+    SKIP_PROMPT=false
+    if [ "$VERSION_STATUS" = "latest" ]; then
+        # 镜像已是最新
+        if [ "$AGE_DAYS" -le 7 ]; then
+            echo -e "${GREEN}✓${NC} 镜像很新 (${AGE_DAYS} 天)，自动跳过更新"
+            SHOULD_PULL=false
+            SKIP_PROMPT=true
+        else
+            printf "${CYAN}是否重新拉取镜像? [y/N]: ${NC}"
+        fi
+    elif [ "$VERSION_STATUS" = "outdated" ]; then
+        # 发现新版本
+        printf "${YELLOW}是否更新到最新版本? [Y/n]: ${NC}"
+    else
+        # 无法检查版本
+        if [ "$AGE_DAYS" -gt 30 ]; then
+            echo -e "${YELLOW}提示:${NC} 镜像较旧 (${AGE_DAYS} 天)，建议更新"
+            printf "${CYAN}是否更新镜像? [Y/n]: ${NC}"
+        else
+            printf "${CYAN}是否更新镜像? [y/N]: ${NC}"
+        fi
+    fi
+
+    if [ "$SKIP_PROMPT" = false ]; then
+        read REBUILD_CHOICE
+        echo ""
+
+        # 处理默认值
+        if [ -z "$REBUILD_CHOICE" ]; then
+            if [ "$VERSION_STATUS" = "outdated" ] || [ "$AGE_DAYS" -gt 30 ]; then
+                REBUILD_CHOICE="y"  # 有新版本或镜像较旧时默认更新
+            else
+                REBUILD_CHOICE="n"  # 其他情况默认不更新
+            fi
+        fi
+
+        REBUILD_CHOICE=$(echo "$REBUILD_CHOICE" | tr '[:upper:]' '[:lower:]')
+
+        if [[ "$REBUILD_CHOICE" == "y" ]]; then
+            log_info "准备更新镜像..."
+            SHOULD_PULL=true
+        else
+            log_info "跳过更新，使用现有镜像"
+            SHOULD_PULL=false
+        fi
+    else
+        echo ""
     fi
 fi
 
@@ -2210,13 +2287,13 @@ if [ "$SHOULD_PULL" = true ]; then
         log_info "备份配置文件到: backups/docker-compose_backup_${COMPOSE_BACKUP_TIMESTAMP}.yml"
 
         # 直接修改 docker-compose.yml 中的镜像地址
-        # 找到 bettafish 服务的 image 行并替换
+        # 找到 bettafish 服务的 image 行并替换(只匹配非注释行)
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS
-            sed -i '' "/bettafish:/,/image:/ s|image:.*bettafish.*|image: $BEST_REGISTRY|" docker-compose.yml
+            sed -i '' "/bettafish:/,/container_name:/ s|^[[:space:]]*image:.*bettafish.*|    image: $BEST_REGISTRY|" docker-compose.yml
         else
             # Linux
-            sed -i "/bettafish:/,/image:/ s|image:.*bettafish.*|image: $BEST_REGISTRY|" docker-compose.yml
+            sed -i "/bettafish:/,/container_name:/ s|^[[:space:]]*image:.*bettafish.*|    image: $BEST_REGISTRY|" docker-compose.yml
         fi
 
         log_success "镜像源配置完成"
@@ -2229,16 +2306,69 @@ if [ "$SHOULD_PULL" = true ]; then
 
     echo ""
 
-    # 拉取镜像
-    log_info "开始拉取官方预构建镜像..."
-    log_info "镜像大小约 5GB，预计 5-15 分钟"
-    echo ""
-
     # 记录开始时间
     PULL_START_TIME=$(date +%s)
 
-    # 拉取镜像
-    if docker_compose_cmd pull; then
+    # 先处理 PostgreSQL 镜像（避免从 Docker Hub 拉取超时）
+    log_info "准备 PostgreSQL 数据库镜像..."
+    POSTGRES_READY=false
+
+    # 检查是否已有 postgres:15 镜像
+    if docker images postgres:15 --format "{{.Repository}}:{{.Tag}}" 2>/dev/null | grep -q "^postgres:15$"; then
+        log_success "PostgreSQL 镜像已存在"
+        POSTGRES_READY=true
+    else
+        # 尝试从镜像加速源拉取
+        log_info "从镜像加速源下载 PostgreSQL..."
+        if docker pull docker.m.daocloud.io/postgres:15 2>/dev/null; then
+            docker tag docker.m.daocloud.io/postgres:15 postgres:15
+            docker rmi docker.m.daocloud.io/postgres:15 2>/dev/null || true
+            log_success "PostgreSQL 镜像准备完成 (使用 DaoCloud 加速)"
+            POSTGRES_READY=true
+        else
+            log_warn "镜像加速源失败，将尝试官方源"
+            # 继续执行，让 docker compose pull 尝试官方源
+        fi
+    fi
+    echo ""
+
+    # 拉取 BettaFish 镜像
+    log_info "开始拉取 BettaFish 镜像..."
+    log_info "镜像大小约 5GB，预计 5-15 分钟"
+    echo ""
+
+    # 如果 PostgreSQL 已准备好，只拉取 bettafish；否则拉取全部
+    if [ "$POSTGRES_READY" = true ]; then
+        # 只拉取 bettafish，避免 PostgreSQL 从 Docker Hub 重新拉取
+        docker_compose_cmd pull bettafish > /tmp/docker_pull.log 2>&1 &
+        PULL_PID=$!
+    else
+        # 拉取所有镜像
+        docker_compose_cmd pull > /tmp/docker_pull.log 2>&1 &
+        PULL_PID=$!
+    fi
+
+    # 显示动画进度条（使用 ASCII 字符）
+    PULL_SPINNER=('|' '/' '-' '\')
+    PULL_SPIN_IDX=0
+    PULL_ELAPSED=0
+    while kill -0 $PULL_PID 2>/dev/null; do
+        PULL_MINUTES=$((PULL_ELAPSED / 60))
+        PULL_SECS=$((PULL_ELAPSED % 60))
+        printf "\r${CYAN}[${PULL_SPINNER[$PULL_SPIN_IDX]}]${NC} ${BOLD}正在下载镜像...${NC} ${YELLOW}已耗时: ${PULL_MINUTES}m ${PULL_SECS}s${NC}"
+        PULL_SPIN_IDX=$(((PULL_SPIN_IDX + 1) % 4))
+        sleep 1
+        PULL_ELAPSED=$((PULL_ELAPSED + 1))
+    done
+
+    # 等待进程结束并获取返回值
+    wait $PULL_PID
+    PULL_RESULT=$?
+
+    # 清除进度行
+    printf "\r%80s\r" " "
+
+    if [ $PULL_RESULT -eq 0 ]; then
         PULL_END_TIME=$(date +%s)
         PULL_DURATION=$((PULL_END_TIME - PULL_START_TIME))
         PULL_MINUTES=$((PULL_DURATION / 60))
@@ -2273,23 +2403,143 @@ if [ "$SHOULD_PULL" = true ]; then
 
     else
         echo ""
-        log_error "镜像拉取失败"
-        echo ""
-        log_info "正在恢复 docker-compose.yml ..."
 
-        # 恢复备份
-        if [ -f "$COMPOSE_BACKUP_FILE" ]; then
-            cp "$COMPOSE_BACKUP_FILE" docker-compose.yml
-            log_success "配置已恢复"
+        # 检查具体是哪个镜像失败
+        BETTAFISH_SUCCESS=false
+        POSTGRES_SUCCESS=false
+
+        # 检查日志判断哪个服务成功了
+        if grep -q "bettafish Pulled" /tmp/docker_pull.log 2>/dev/null; then
+            BETTAFISH_SUCCESS=true
+        fi
+        if grep -q "db Pulled" /tmp/docker_pull.log 2>/dev/null; then
+            POSTGRES_SUCCESS=true
         fi
 
-        echo ""
-        log_info "常见问题排查:"
-        echo "  1. 检查网络连接"
-        echo "  2. 确认 Docker 已启动"
-        echo -e "  3. 尝试手动拉取: ${CYAN}docker compose pull${NC}"
-        echo ""
-        exit 1
+        # 根据失败情况给出不同处理
+        if [ "$BETTAFISH_SUCCESS" = true ] && [ "$POSTGRES_SUCCESS" = false ]; then
+            log_warn "BettaFish 镜像拉取成功，PostgreSQL 数据库镜像失败"
+
+            # 检查是否是 PostgreSQL 超时
+            if grep -q "db Error.*timeout\|db Error.*deadline exceeded\|postgres.*timeout" /tmp/docker_pull.log 2>/dev/null; then
+                echo ""
+                log_warn "检测到 PostgreSQL 从 Docker Hub 拉取超时"
+                log_info "尝试使用国内镜像加速源..."
+                echo ""
+
+                # 尝试使用镜像加速拉取 PostgreSQL
+                if docker pull docker.m.daocloud.io/postgres:15; then
+                    log_success "PostgreSQL 镜像拉取成功 (使用 DaoCloud 加速)"
+                    docker tag docker.m.daocloud.io/postgres:15 postgres:15
+                    docker rmi docker.m.daocloud.io/postgres:15 2>/dev/null || true
+
+                    echo ""
+                    log_success "所有镜像准备完成！"
+                    echo -e "  ${GREEN}✓${NC} BettaFish 应用镜像"
+                    echo -e "  ${GREEN}✓${NC} PostgreSQL 数据库镜像"
+                    echo ""
+
+                    # 设置为成功，继续后续流程
+                    PULL_RESULT=0
+                else
+                    echo ""
+                    log_error "镜像加速源也失败了"
+
+                    # 恢复备份
+                    if [ -f "$COMPOSE_BACKUP_FILE" ]; then
+                        cp "$COMPOSE_BACKUP_FILE" docker-compose.yml
+                        log_success "配置已恢复"
+                    fi
+
+                    echo ""
+                    log_info "解决方案:"
+                    echo "  1. 配置 Docker 镜像加速 (推荐)"
+                    echo "  2. 手动下载 PostgreSQL 镜像"
+                    echo -e "  3. 使用命令: ${CYAN}docker pull docker.m.daocloud.io/postgres:15${NC}"
+                    echo -e "     然后: ${CYAN}docker tag docker.m.daocloud.io/postgres:15 postgres:15${NC}"
+                    echo ""
+                    exit 1
+                fi
+            else
+                # PostgreSQL 失败但不是超时，可能是其他错误
+                log_error "PostgreSQL 镜像拉取失败"
+
+                # 恢复备份
+                if [ -f "$COMPOSE_BACKUP_FILE" ]; then
+                    cp "$COMPOSE_BACKUP_FILE" docker-compose.yml
+                    log_success "配置已恢复"
+                fi
+
+                echo ""
+                log_info "请检查网络连接或尝试配置 Docker 镜像加速"
+                echo ""
+                exit 1
+            fi
+        elif [ "$BETTAFISH_SUCCESS" = false ]; then
+            # BettaFish 镜像拉取失败
+            log_error "BettaFish 镜像拉取失败"
+
+            # 恢复备份
+            if [ -f "$COMPOSE_BACKUP_FILE" ]; then
+                cp "$COMPOSE_BACKUP_FILE" docker-compose.yml
+                log_success "配置已恢复"
+            fi
+
+            echo ""
+            log_info "常见问题排查:"
+            echo "  1. 检查网络连接"
+            echo "  2. 确认所选镜像源可访问"
+            echo -e "  3. 尝试手动拉取: ${CYAN}docker pull $BEST_REGISTRY${NC}"
+            echo ""
+            exit 1
+        else
+            # 两个都失败了
+            log_error "所有镜像拉取失败"
+
+            # 恢复备份
+            if [ -f "$COMPOSE_BACKUP_FILE" ]; then
+                cp "$COMPOSE_BACKUP_FILE" docker-compose.yml
+                log_success "配置已恢复"
+            fi
+
+            echo ""
+            log_info "常见问题排查:"
+            echo "  1. 检查网络连接"
+            echo "  2. 确认 Docker 已启动"
+            echo -e "  3. 尝试手动拉取: ${CYAN}docker compose pull${NC}"
+            echo ""
+            exit 1
+        fi
+
+        # 如果重试成功，显示拉取耗时和架构验证
+        if [ $PULL_RESULT -eq 0 ]; then
+            PULL_END_TIME=$(date +%s)
+            PULL_DURATION=$((PULL_END_TIME - PULL_START_TIME))
+            PULL_MINUTES=$((PULL_DURATION / 60))
+            PULL_SECONDS=$((PULL_DURATION % 60))
+
+            echo -e "  ${CYAN}总耗时:${NC} ${BOLD}${PULL_MINUTES} 分 ${PULL_SECONDS} 秒${NC}"
+            echo ""
+
+            # 验证镜像架构
+            PULLED_IMAGE=$(docker images -q "$BEST_REGISTRY" 2>/dev/null)
+            if [ -n "$PULLED_IMAGE" ]; then
+                PULLED_ARCH=$(docker inspect --format='{{.Architecture}}' "$PULLED_IMAGE" 2>/dev/null || echo "未知")
+                log_info "镜像架构: ${BOLD}$PULLED_ARCH${NC}"
+
+                # 架构验证
+                if [ "$ARCH" = "x86_64" ] && [ "$PULLED_ARCH" != "amd64" ]; then
+                    log_warn "警告：镜像架构 ($PULLED_ARCH) 与系统架构 (x86_64) 不匹配"
+                elif [ "$ARCH" = "arm64" ] && [ "$PULLED_ARCH" != "arm64" ]; then
+                    log_warn "警告：镜像架构 ($PULLED_ARCH) 与系统架构 (arm64) 不匹配"
+                else
+                    log_success "架构验证通过"
+                fi
+            fi
+
+            # 备份保留在 backups 目录，不删除
+            log_info "配置备份已保存到: $COMPOSE_BACKUP_FILE"
+        fi
     fi
 fi
 
@@ -2460,18 +2710,28 @@ find_available_port() {
 
 # 检测端口占用情况
 log_info "检测端口使用情况..."
-DEFAULT_PORT=5000
-FINAL_PORT=$DEFAULT_PORT
-PORT_MODIFIED=false
 
-# 检查默认端口 5000 是否可用
-if ! check_port_available $DEFAULT_PORT; then
-    log_warn "默认端口 ${DEFAULT_PORT} 已被占用"
+# 首先检查 docker-compose.yml 中是否已经配置了其他端口
+CONFIGURED_PORT=$(grep -E '^\s*-\s*"[0-9]+:5000"' docker-compose.yml 2>/dev/null | grep -oE '[0-9]+:5000' | cut -d':' -f1)
+
+DEFAULT_PORT=5000
+if [ -n "$CONFIGURED_PORT" ] && [ "$CONFIGURED_PORT" != "$DEFAULT_PORT" ]; then
+    log_info "检测到 docker-compose.yml 已配置端口: ${CONFIGURED_PORT}"
+    FINAL_PORT=$CONFIGURED_PORT
+    PORT_MODIFIED=true
+else
+    FINAL_PORT=$DEFAULT_PORT
+    PORT_MODIFIED=false
+fi
+
+# 检查配置的端口是否可用
+if ! check_port_available $FINAL_PORT; then
+    log_warn "端口 ${FINAL_PORT} 已被占用"
     echo ""
 
-    # 显示占用进程信息（不硬编码具体原因）
+    # 显示占用进程信息
     if command_exists lsof; then
-        OCCUPYING_INFO=$(lsof -i :$DEFAULT_PORT 2>/dev/null | awk 'NR==2 {print $1, $2}' | head -1)
+        OCCUPYING_INFO=$(lsof -i :$FINAL_PORT 2>/dev/null | awk 'NR==2 {print $1, $2}' | head -1)
         if [ -n "$OCCUPYING_INFO" ]; then
             echo -e "  ${CYAN}占用进程:${NC} $OCCUPYING_INFO"
         fi
@@ -2498,15 +2758,21 @@ if ! check_port_available $DEFAULT_PORT; then
         cp docker-compose.yml "$PORT_BACKUP_FILE"
 
         # 修改端口映射（跨平台兼容）
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            sed -i '' "s/- \"${DEFAULT_PORT}:5000\"/- \"${FINAL_PORT}:5000\"/" docker-compose.yml
-        else
-            # Linux
-            sed -i "s/- \"${DEFAULT_PORT}:5000\"/- \"${FINAL_PORT}:5000\"/" docker-compose.yml
+        # 需要替换的原始端口（可能是 DEFAULT_PORT 或 CONFIGURED_PORT）
+        OLD_PORT=$(grep -E '^\s*-\s*"[0-9]+:5000"' docker-compose.yml 2>/dev/null | grep -oE '[0-9]+:5000' | cut -d':' -f1)
+        if [ -z "$OLD_PORT" ]; then
+            OLD_PORT=$DEFAULT_PORT
         fi
 
-        log_success "端口配置已更新: ${DEFAULT_PORT} → ${FINAL_PORT}"
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            sed -i '' "s/- \"${OLD_PORT}:5000\"/- \"${FINAL_PORT}:5000\"/" docker-compose.yml
+        else
+            # Linux
+            sed -i "s/- \"${OLD_PORT}:5000\"/- \"${FINAL_PORT}:5000\"/" docker-compose.yml
+        fi
+
+        log_success "端口配置已更新: ${OLD_PORT} → ${FINAL_PORT}"
         echo ""
     else
         log_error "无法找到可用端口 (5001-5010 全部被占用)"
@@ -2518,7 +2784,11 @@ if ! check_port_available $DEFAULT_PORT; then
         exit 1
     fi
 else
-    log_success "默认端口 ${DEFAULT_PORT} 可用"
+    if [ "$FINAL_PORT" = "$DEFAULT_PORT" ]; then
+        log_success "默认端口 ${DEFAULT_PORT} 可用"
+    else
+        log_success "配置端口 ${FINAL_PORT} 可用"
+    fi
     echo ""
 fi
 
@@ -2586,7 +2856,17 @@ if docker_compose_cmd up -d; then
         log_success "应用启动正常"
     fi
 
-    APP_PORT=$FINAL_PORT
+    # 从 docker-compose.yml 读取实际使用的端口（以实际配置为准）
+    ACTUAL_PORT=$(grep -E '^\s*-\s*"[0-9]+:5000"' docker-compose.yml | grep -oE '[0-9]+:5000' | cut -d':' -f1)
+
+    if [ -n "$ACTUAL_PORT" ]; then
+        APP_PORT=$ACTUAL_PORT
+        if [ "$ACTUAL_PORT" != "$FINAL_PORT" ]; then
+            log_warn "检测到实际端口 ($ACTUAL_PORT) 与预期端口 ($FINAL_PORT) 不一致，使用实际端口"
+        fi
+    else
+        APP_PORT=$FINAL_PORT
+    fi
 
 else
     echo ""
@@ -2610,9 +2890,13 @@ else
     log_info "常见问题排查:"
     echo "  1. 检查镜像是否成功拉取: docker images | grep bettafish"
     echo "  2. 检查架构是否匹配: docker inspect <image> --format='{{.Architecture}}'"
-    echo "  3. 检查端口是否被占用: lsof -i :5000"
+    echo "  3. 检查端口是否被占用: lsof -i :${FINAL_PORT}"
     echo "  4. 查看完整日志: docker compose logs"
     echo ""
+
+    # 设置 APP_PORT 以便后续可能的使用
+    APP_PORT=$FINAL_PORT
+
     exit 1
 fi
 
@@ -2695,6 +2979,136 @@ fi
 
 echo -e "${CYAN}${BOLD}🌐 服务访问地址:${NC}"
 echo ""
+
+# 检测公网IP（仅在服务器环境显示）
+PUBLIC_IP=""
+if [[ ! "$OSTYPE" == "darwin"* ]] && [[ ! -f /.dockerenv ]]; then
+    # 不是 macOS 且不在容器内，尝试获取公网IP
+    PUBLIC_IP=$(curl -s --connect-timeout 2 ifconfig.me 2>/dev/null || \
+                curl -s --connect-timeout 2 ipinfo.io/ip 2>/dev/null || \
+                curl -s --connect-timeout 2 api.ipify.org 2>/dev/null)
+
+    # 如果成功获取到公网IP，显示公网访问地址
+    if [ -n "$PUBLIC_IP" ] && [ "$PUBLIC_IP" != "" ]; then
+        echo -e "  ${YELLOW}🌍 公网访问地址:${NC}"
+        echo -e "  ${GREEN}●${NC} BettaFish 主服务:       ${BLUE}http://${PUBLIC_IP}:${APP_PORT}${NC}"
+        echo -e "  ${GREEN}●${NC} Insight Engine:        ${BLUE}http://${PUBLIC_IP}:8501${NC}"
+        echo -e "  ${GREEN}●${NC} Media Engine:          ${BLUE}http://${PUBLIC_IP}:8502${NC}"
+        echo -e "  ${GREEN}●${NC} Query Engine:          ${BLUE}http://${PUBLIC_IP}:8503${NC}"
+        echo ""
+
+        # 如果端口不是默认的 5000，特别提醒
+        if [ "$APP_PORT" != "5000" ]; then
+            echo -e "  ${YELLOW}⚠️  重要提示:${NC}"
+            echo -e "  主服务使用端口 ${BOLD}${APP_PORT}${NC}（而非默认的 5000）"
+            echo -e "  请确保云服务器安全组开放了端口 ${BOLD}${APP_PORT}${NC}"
+            echo ""
+        fi
+
+        # 检测并配置防火墙
+        echo -e "  ${CYAN}正在检测防火墙配置...${NC}"
+
+        PORTS_TO_OPEN=("$APP_PORT" "8501" "8502" "8503")
+        FIREWALL_CMD=""
+        NEED_OPEN_PORTS=()
+
+        # 检测防火墙类型
+        if command -v firewall-cmd >/dev/null 2>&1; then
+            FIREWALL_CMD="firewalld"
+            # 检查哪些端口未开放
+            for port in "${PORTS_TO_OPEN[@]}"; do
+                if ! firewall-cmd --list-ports 2>/dev/null | grep -q "${port}/tcp"; then
+                    NEED_OPEN_PORTS+=("$port")
+                fi
+            done
+        elif command -v ufw >/dev/null 2>&1; then
+            FIREWALL_CMD="ufw"
+            # 检查哪些端口未开放
+            for port in "${PORTS_TO_OPEN[@]}"; do
+                if ! ufw status 2>/dev/null | grep -q "^${port}/tcp.*ALLOW"; then
+                    NEED_OPEN_PORTS+=("$port")
+                fi
+            done
+        fi
+
+        if [ ${#NEED_OPEN_PORTS[@]} -gt 0 ]; then
+            echo -e "  ${YELLOW}⚠️  检测到以下端口未开放:${NC} ${NEED_OPEN_PORTS[*]}"
+            echo ""
+            printf "  ${YELLOW}是否自动开放这些端口? [Y/n]: ${NC}"
+            read AUTO_OPEN_PORTS
+            AUTO_OPEN_PORTS=$(echo "$AUTO_OPEN_PORTS" | tr '[:upper:]' '[:lower:]')
+
+            if [[ -z "$AUTO_OPEN_PORTS" ]] || [[ "$AUTO_OPEN_PORTS" == "y" ]]; then
+                echo ""
+                log_info "正在配置防火墙..."
+
+                if [ "$FIREWALL_CMD" = "firewalld" ]; then
+                    for port in "${NEED_OPEN_PORTS[@]}"; do
+                        echo -e "  ${CYAN}开放端口 ${port}/tcp...${NC}"
+                        if firewall-cmd --permanent --add-port=${port}/tcp >/dev/null 2>&1; then
+                            echo -e "  ${GREEN}✓${NC} 端口 ${port} 已开放"
+                        else
+                            echo -e "  ${RED}✗${NC} 端口 ${port} 开放失败（可能需要 root 权限）"
+                        fi
+                    done
+
+                    echo -e "  ${CYAN}重载防火墙配置...${NC}"
+                    if firewall-cmd --reload >/dev/null 2>&1; then
+                        log_success "防火墙配置完成！"
+                    else
+                        log_warn "防火墙重载失败，可能需要手动执行: sudo firewall-cmd --reload"
+                    fi
+
+                elif [ "$FIREWALL_CMD" = "ufw" ]; then
+                    for port in "${NEED_OPEN_PORTS[@]}"; do
+                        echo -e "  ${CYAN}开放端口 ${port}/tcp...${NC}"
+                        if ufw allow ${port}/tcp >/dev/null 2>&1; then
+                            echo -e "  ${GREEN}✓${NC} 端口 ${port} 已开放"
+                        else
+                            echo -e "  ${RED}✗${NC} 端口 ${port} 开放失败（可能需要 root 权限）"
+                        fi
+                    done
+                    log_success "防火墙配置完成！"
+                fi
+                echo ""
+            else
+                echo ""
+                log_warn "请手动开放端口"
+                if [ "$FIREWALL_CMD" = "firewalld" ]; then
+                    echo -e "  使用命令: ${CYAN}sudo firewall-cmd --permanent --add-port={${APP_PORT},8501,8502,8503}/tcp${NC}"
+                    echo -e "           ${CYAN}sudo firewall-cmd --reload${NC}"
+                elif [ "$FIREWALL_CMD" = "ufw" ]; then
+                    echo -e "  使用命令: ${CYAN}sudo ufw allow ${APP_PORT}/tcp${NC}"
+                    echo -e "           ${CYAN}sudo ufw allow 8501:8503/tcp${NC}"
+                fi
+                echo ""
+            fi
+        else
+            echo -e "  ${GREEN}✓${NC} 系统防火墙端口已开放"
+            echo ""
+        fi
+
+        # 提醒检查云服务器安全组
+        echo -e "  ${YELLOW}☁️  云服务器安全组提醒:${NC}"
+        echo -e "  如果仍无法访问，请检查云服务商的安全组配置"
+        echo ""
+        echo -e "  ${CYAN}需要开放的端口:${NC} ${APP_PORT}, 8501, 8502, 8503"
+        echo ""
+        echo -e "  ${CYAN}阿里云 ECS:${NC}"
+        echo -e "    1. 访问: https://ecs.console.aliyun.com/"
+        echo -e "    2. 选择实例 → 安全组 → 配置规则"
+        echo -e "    3. 添加入方向规则，开放端口: ${APP_PORT}, 8501-8503"
+        echo ""
+        echo -e "  ${CYAN}腾讯云 CVM:${NC}"
+        echo -e "    访问: https://console.cloud.tencent.com/cvm/securitygroup"
+        echo ""
+        echo -e "  ${CYAN}华为云 ECS:${NC}"
+        echo -e "    访问: https://console.huaweicloud.com/ecm/"
+        echo ""
+    fi
+fi
+
+echo -e "  ${CYAN}📍 本地访问地址:${NC}"
 echo -e "  ${GREEN}●${NC} BettaFish 主服务:       ${BLUE}http://localhost:${APP_PORT}${NC}"
 echo -e "  ${GREEN}●${NC} Insight Engine:        ${BLUE}http://localhost:8501${NC}"
 echo -e "  ${GREEN}●${NC} Media Engine:          ${BLUE}http://localhost:8502${NC}"
@@ -2720,8 +3134,13 @@ echo ""
 
 echo -e "${CYAN}${BOLD}🔧 快速访问:${NC}"
 echo ""
-echo -e "  ${BLUE}浏览器打开:${NC} http://localhost:${APP_PORT}"
-echo -e "  ${BLUE}命令行测试:${NC} curl http://localhost:${APP_PORT}"
+if [ -n "$PUBLIC_IP" ]; then
+    echo -e "  ${BLUE}浏览器访问:${NC} http://${PUBLIC_IP}:${APP_PORT}"
+    echo -e "  ${BLUE}命令行测试:${NC} curl http://${PUBLIC_IP}:${APP_PORT}"
+else
+    echo -e "  ${BLUE}浏览器打开:${NC} http://localhost:${APP_PORT}"
+    echo -e "  ${BLUE}命令行测试:${NC} curl http://localhost:${APP_PORT}"
+fi
 echo ""
 
 echo -e "${CYAN}${BOLD}📁 项目位置:${NC}"
@@ -2744,22 +3163,31 @@ log_success "部署流程完成！"
 echo -e "${CYAN}${BOLD}💡 下一步:${NC}"
 echo ""
 echo -e "  1. 等待 1-2 分钟让服务完全启动"
-echo -e "  2. 访问 ${BLUE}http://localhost:${APP_PORT}${NC} 测试服务"
+if [ -n "$PUBLIC_IP" ]; then
+    echo -e "  2. 访问 ${BLUE}http://${PUBLIC_IP}:${APP_PORT}${NC} 测试服务"
+else
+    echo -e "  2. 访问 ${BLUE}http://localhost:${APP_PORT}${NC} 测试服务"
+fi
 echo -e "  3. 查看日志确认服务运行正常: ${YELLOW}docker logs -f bettafish${NC}"
 echo ""
 
-# 询问是否打开浏览器
-echo -e "${CYAN}${BOLD}🌐 是否使用默认浏览器打开服务页面？${NC}"
-echo ""
-echo -e "  ${GREEN}[Y]${NC} 是 (默认)"
-echo -e "  ${RED}[N]${NC} 否"
-echo ""
-read -p "请选择 [Y/n]: " -n 1 -r OPEN_BROWSER
-echo ""
+# 只在本地环境询问是否打开浏览器
+if [ -z "$PUBLIC_IP" ]; then
+    echo -e "${CYAN}${BOLD}🌐 是否使用默认浏览器打开服务页面？${NC}"
+    echo ""
+    echo -e "  ${GREEN}[Y]${NC} 是 (默认)"
+    echo -e "  ${RED}[N]${NC} 否"
+    echo ""
+    read -p "请选择 [Y/n]: " -n 1 -r OPEN_BROWSER
+    echo ""
 
-# 默认为 Y
-if [[ -z "$OPEN_BROWSER" ]]; then
-    OPEN_BROWSER="Y"
+    # 默认为 Y
+    if [[ -z "$OPEN_BROWSER" ]]; then
+        OPEN_BROWSER="Y"
+    fi
+else
+    # 服务器环境不打开浏览器
+    OPEN_BROWSER="N"
 fi
 
 if [[ $OPEN_BROWSER =~ ^[Yy]$ ]]; then
@@ -2791,6 +3219,10 @@ if [[ $OPEN_BROWSER =~ ^[Yy]$ ]]; then
     echo ""
 else
     echo ""
-    log_info "已跳过浏览器打开，请手动访问: ${BLUE}http://localhost:${APP_PORT}${NC}"
+    if [ -n "$PUBLIC_IP" ]; then
+        log_info "服务器环境，请通过公网IP访问: ${BLUE}http://${PUBLIC_IP}:${APP_PORT}${NC}"
+    else
+        log_info "已跳过浏览器打开，请手动访问: ${BLUE}http://localhost:${APP_PORT}${NC}"
+    fi
     echo ""
 fi
