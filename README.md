@@ -149,7 +149,6 @@ deployment-scripts-hub/
         ├── docs/                      # 文档目录
         ├── backups/                   # 备份目录
         ├── offline-packages/          # 离线包目录
-        └── BettaFish-main/            # BettaFish 项目源码
 ```
 
 ---
