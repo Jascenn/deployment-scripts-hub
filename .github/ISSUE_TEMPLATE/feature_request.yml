@@ -1,0 +1,25 @@
+name: Feature request
+description: 提出部署工具或文档改进建议
+title: "feat: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决的问题
+      description: 请描述真实部署场景和当前阻塞点。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 考虑过的替代方案
+    validations:
+      required: false
